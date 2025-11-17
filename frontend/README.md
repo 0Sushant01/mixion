@@ -1,3 +1,52 @@
+# Mixion Frontend (Next.js)
+
+Development commands and environment
+
+Prerequisites
+- Node.js (>=18 recommended)
+- pnpm or npm/yarn (examples use pnpm)
+
+Environment variables
+- `NEXT_PUBLIC_API_BASE` — Base URL for backend API (default: `http://localhost:8000/api`)
+
+Install dependencies
+```bash
+cd frontend
+pnpm install
+```
+
+Run development server
+```bash
+pnpm dev
+```
+
+Build & start
+```bash
+pnpm build
+pnpm start
+```
+
+Linting
+```bash
+pnpm lint
+pnpm lint:fix
+```
+
+Testing
+```bash
+pnpm test
+```
+
+Husky (git hooks)
+```bash
+pnpm prepare
+# then enable hooks
+npx husky add .husky/pre-commit "npx --no -- lint-staged"
+```
+
+Notes
+- The repository includes Tailwind CSS and PostCSS configuration.
+- Add credentials or API URLs via a `.env.local` file as needed.
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
