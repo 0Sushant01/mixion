@@ -8,6 +8,12 @@ Prerequisites
 
 Environment variables
 - `NEXT_PUBLIC_API_BASE` — Base URL for backend API (default: `http://localhost:8000/api`)
+ - `NEXT_PUBLIC_API_BASE` — Base URL for backend API (default: `http://localhost:8000/api`)
+ - `NEXT_PUBLIC_IDLE_VIDEO` — (optional) path to the idle video to play on the homepage (default: `/idle.mp4`). Place the file in `frontend/public/` (for example `frontend/public/idle.mp4`). Supported formats: `mp4`, `webm`.
+  
+Audio and voice behavior
+- If your video contains a voice/audio track, browsers will not autoplay audible audio until the user interacts with the page. This app mutes the video for autoplay. On the first user tap/click the app will unmute the video and allow its audio (voice) to play while showing the login options overlay.
+- If you prefer a separate audio file, you can provide `NEXT_PUBLIC_IDLE_AUDIO=/idle-audio.mp3` and the app can be adapted to play that file on first interaction instead of unmuting the video.
 
 Install dependencies
 ```bash
