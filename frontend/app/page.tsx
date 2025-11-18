@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import IdleTimer from "./components/IdleTimer";
 
 export default function Home() {
   const router = useRouter();
@@ -87,9 +88,14 @@ export default function Home() {
             <h2 className="text-2xl font-semibold mb-4">Welcome — choose login</h2>
             <p className="text-sm text-white/70 mb-6">Are you a customer or the owner?</p>
 
+            {/* Auto-refresh if no selection in 15s */}
+            <div className="absolute top-4 right-6">
+              <IdleTimer onTimeout={() => { window.location.reload(); }} timeoutSeconds={15} />
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => router.push('/login?role=customer')}
+                onClick={() => router.push('/login')}
                 className="w-56 px-6 py-3 rounded-2xl bg-white text-zinc-900 text-lg font-medium shadow"
               >
                 Customer

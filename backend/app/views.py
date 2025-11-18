@@ -1,121 +1,88 @@
-from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
 
-from .models import BottleSlot, DrinkRecipe, Purchase, DailyCount, Telemetry, WalletTransaction
+from .models import Owner, Customer, DailyCount, BottleSlot, Recipe
 from .serializers import (
-    BottleSlotSerializer,
-    DrinkRecipeSerializer,
-    PurchaseSerializer,
+    OwnerSerializer,
+    CustomerSerializer,
     DailyCountSerializer,
-    TelemetrySerializer,
-    WalletTransactionSerializer,
+    BottleSlotSerializer,
+    RecipeSerializer,
 )
 
 
-User = get_user_model()
-
-
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return getattr(request.user, "role", "") in ("owner", "admin")
-
-
-class BottleSlotViewSet(viewsets.ModelViewSet):
-    queryset = BottleSlot.objects.all().order_by("slot_number")
-    serializer_class = BottleSlotSerializer
-    permission_classes = [IsOwnerOrReadOnly]
-
-
-class DrinkRecipeViewSet(viewsets.ModelViewSet):
-    queryset = DrinkRecipe.objects.filter(is_active=True).order_by("name")
-    serializer_class = DrinkRecipeSerializer
-    permission_classes = [IsOwnerOrReadOnly]
-
-
-class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = Purchase.objects.all().order_by("-timestamp")
-    serializer_class = PurchaseSerializer
+class OwnerViewSet(viewsets.ModelViewSet):
+    queryset = Owner.objects.all().order_by("name")
+    serializer_class = OwnerSerializer
     permission_classes = [permissions.AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        # Simplified create: expect recipe id, amount_paid_cents, payment_method, optional user
-        data = request.data
-        try:
-            recipe = DrinkRecipe.objects.get(pk=data.get("recipe_id"))
-        except DrinkRecipe.DoesNotExist:
-            return Response({"detail": "recipe not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = None
-        if data.get("user_id"):
-            try:
-                user = User.objects.get(pk=data.get("user_id"))
-            except User.DoesNotExist:
-                user = None
-
-        purchase = Purchase.objects.create(
-            user=user,
-            recipe=recipe,
-            amount_paid_cents=data.get("amount_paid_cents", recipe.price_cents),
-            price_at_purchase_cents=data.get("price_at_purchase_cents", recipe.price_cents),
-            quantity=data.get("quantity", 1),
-            payment_method=data.get("payment_method", "card"),
-            status=data.get("status", "completed"),
-            transaction_metadata=data.get("transaction_metadata", {}),
-        )
-
-        # If bottles info provided, attach PurchaseBottle records (frontend should provide volumes)
-        bottles = data.get("bottles", [])
-        for b in bottles:
-            slot_id = b.get("slot_id")
-            vol = b.get("volume_ml")
-            if slot_id and vol:
-                try:
-                    slot = BottleSlot.objects.get(pk=slot_id)
-                    purchase.purchasebottle_set.create(slot=slot, volume_ml=vol)
-                    # decrement slot volume - naive update
-                    slot.current_volume_ml = max(0.0, slot.current_volume_ml - float(vol))
-                    slot.save()
-                except BottleSlot.DoesNotExist:
-                    continue
-
-        serializer = self.get_serializer(purchase)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+class CustomerViewSet(viewsets.ModelViewSet):
+    queryset = Customer.objects.all().order_by("name")
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class DailyCountViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = DailyCount.objects.all().order_by("-date")
+    queryset = DailyCount.objects.all().order_by("-timestamp")
     serializer_class = DailyCountSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class TelemetryViewSet(viewsets.ModelViewSet):
-    queryset = Telemetry.objects.all().order_by("-timestamp")
-    serializer_class = TelemetrySerializer
     permission_classes = [permissions.AllowAny]
 
 
-class WalletTransactionViewSet(viewsets.ModelViewSet):
-    queryset = WalletTransaction.objects.all().order_by("-timestamp")
-    serializer_class = WalletTransactionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class BottleSlotViewSet(viewsets.ModelViewSet):
+    queryset = BottleSlot.objects.all().order_by("bottle_number")
+    serializer_class = BottleSlotSerializer
+    permission_classes = [permissions.AllowAny]
 
-    @action(detail=False, methods=["post"], permission_classes=[permissions.IsAuthenticated])
-    def topup(self, request):
-        amount = int(request.data.get("amount_cents", 0))
-        if amount <= 0:
-            return Response({"detail": "invalid amount"}, status=status.HTTP_400_BAD_REQUEST)
-        wt = WalletTransaction.objects.create(user=request.user, amount_cents=amount, type="topup")
-        request.user.wallet_balance_cents = request.user.wallet_balance_cents + amount
-        request.user.save()
-        return Response(WalletTransactionSerializer(wt).data, status=status.HTTP_201_CREATED)
-from django.shortcuts import render
 
-# Create your views here.
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all().order_by("recipe_name")
+    serializer_class = RecipeSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+def register_user(request):
+    """Register a new customer. Expects 'name', 'email', 'password'."""
+    serializer = CustomerSerializer(data=request.data)
+    if serializer.is_valid():
+        customer = serializer.save()
+        data = CustomerSerializer(customer).data
+        return Response(data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+def login_customer(request):
+    """Simple login that verifies email + password and returns customer data (no token)."""
+    email = request.data.get("email")
+    password = request.data.get("password")
+    if not email or not password:
+        return Response({"detail": "email and password required"}, status=status.HTTP_400_BAD_REQUEST)
+    # First try Customer
+    from django.contrib.auth.hashers import check_password
+
+    try:
+        cust = Customer.objects.get(email=email)
+        # compare hashed password
+        if not check_password(password, cust.password):
+            return Response({"detail": "invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        data = CustomerSerializer(cust).data
+        data["role"] = "customer"
+        return Response(data)
+    except Customer.DoesNotExist:
+        # try Owner as a fallback (owner and customer are distinct models)
+        try:
+            owner = Owner.objects.get(email=email)
+            # Owner.password may be hashed or plain (legacy). Try check_password first,
+            # then fall back to plain equality for backward compatibility.
+            if check_password(password, owner.password) or owner.password == password:
+                data = OwnerSerializer(owner).data
+                data["role"] = "owner"
+                return Response(data)
+            return Response({"detail": "invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        except Owner.DoesNotExist:
+            return Response({"detail": "invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)

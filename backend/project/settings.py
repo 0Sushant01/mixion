@@ -126,8 +126,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Use custom user model from the app so we can store wallet/role fields
-AUTH_USER_MODEL = 'app.User'
+# Note: Using default Django User model. The app now defines simple Owner/Customer models.
 
 # Django REST Framework defaults
 REST_FRAMEWORK = {

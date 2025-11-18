@@ -3,13 +3,14 @@ from django.urls import path, include
 from . import views
 
 router = DefaultRouter()
-router.register(r"slots", views.BottleSlotViewSet, basename="slots")
-router.register(r"recipes", views.DrinkRecipeViewSet, basename="recipes")
-router.register(r"purchases", views.PurchaseViewSet, basename="purchases")
+router.register(r"owners", views.OwnerViewSet, basename="owners")
+router.register(r"customers", views.CustomerViewSet, basename="customers")
 router.register(r"dailycounts", views.DailyCountViewSet, basename="dailycounts")
-router.register(r"telemetry", views.TelemetryViewSet, basename="telemetry")
-router.register(r"wallet", views.WalletTransactionViewSet, basename="wallet")
+router.register(r"bottles", views.BottleSlotViewSet, basename="bottles")
+router.register(r"recipes", views.RecipeViewSet, basename="recipes")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("auth/register/", views.register_user, name="auth-register"),
+    path("auth/login/", views.login_customer, name="auth-login"),
 ]

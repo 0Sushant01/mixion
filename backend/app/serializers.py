@@ -1,74 +1,68 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import (
-    BottleSlot,
-    DrinkRecipe,
-    RecipeIngredient,
-    Purchase,
-    PurchaseBottle,
-    DailyCount,
-    Telemetry,
-    WalletTransaction,
-)
+from django.contrib.auth.hashers import make_password
+from .models import Owner, Customer, DailyCount, BottleSlot, Recipe
 
 
-User = get_user_model()
+class OwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Owner
+        fields = ["id", "name", "email"]
 
 
-class BottleSlotSerializer(serializers.ModelSerializer):
-    percent_full = serializers.FloatField(source="percent_full", read_only=True)
+class CustomerSerializer(serializers.ModelSerializer):
+    # accept password write-only; we'll hash it before saving
+    password = serializers.CharField(write_only=True, min_length=4)
 
     class Meta:
-        model = BottleSlot
-        fields = ["id", "slot_number", "bottle_name", "current_volume_ml", "capacity_ml", "percent_full", "is_enabled", "last_refill_at", "calibration"]
+        model = Customer
+        fields = ["id", "name", "email", "password"]
 
+    def validate_email(self, value):
+        if Customer.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A customer with that email already exists")
+        return value
 
-class RecipeIngredientSerializer(serializers.ModelSerializer):
-    slot = BottleSlotSerializer(read_only=True)
-
-    class Meta:
-        model = RecipeIngredient
-        fields = ["slot", "percent"]
-
-
-class DrinkRecipeSerializer(serializers.ModelSerializer):
-    ingredients = RecipeIngredientSerializer(source="recipeingredient_set", many=True, read_only=True)
-
-    class Meta:
-        model = DrinkRecipe
-        fields = ["id", "name", "description", "price_cents", "estimated_volume_ml", "is_active", "ingredients"]
-
-
-class PurchaseBottleSerializer(serializers.ModelSerializer):
-    slot = BottleSlotSerializer(read_only=True)
-
-    class Meta:
-        model = PurchaseBottle
-        fields = ["slot", "volume_ml"]
-
-
-class PurchaseSerializer(serializers.ModelSerializer):
-    bottles = PurchaseBottleSerializer(source="purchasebottle_set", many=True, read_only=True)
-    recipe = DrinkRecipeSerializer(read_only=True)
-
-    class Meta:
-        model = Purchase
-        fields = ["id", "user", "recipe", "amount_paid_cents", "price_at_purchase_cents", "quantity", "timestamp", "payment_method", "status", "transaction_metadata", "bottles"]
+    def create(self, validated_data):
+        raw_password = validated_data.pop("password")
+        # hash password before saving
+        hashed = make_password(raw_password)
+        customer = Customer(**validated_data)
+        customer.password = hashed
+        customer.save()
+        return customer
 
 
 class DailyCountSerializer(serializers.ModelSerializer):
+    customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
+
     class Meta:
         model = DailyCount
-        fields = ["date", "owner", "total_sales_count", "total_revenue_cents", "per_recipe_counts", "updated_at"]
+        fields = ["id", "timestamp", "customer", "amount"]
 
 
-class TelemetrySerializer(serializers.ModelSerializer):
+class BottleSlotSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Telemetry
-        fields = ["id", "device_id", "timestamp", "type", "value"]
+        model = BottleSlot
+        fields = ["bottle_number", "liquid_name"]
 
 
-class WalletTransactionSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WalletTransaction
-        fields = ["id", "user", "amount_cents", "type", "timestamp", "metadata"]
+        model = Recipe
+        fields = [
+            "recipe_name",
+            "bottle_1",
+            "bottle_2",
+            "bottle_3",
+            "bottle_4",
+            "bottle_5",
+            "bottle_6",
+            "bottle_7",
+            "bottle_8",
+            "bottle_9",
+            "bottle_10",
+            "bottle_11",
+            "bottle_12",
+            "price",
+            "video_url",
+        ]

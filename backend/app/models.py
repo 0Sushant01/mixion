@@ -1,147 +1,96 @@
-from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 
-# Custom user to store wallet and role info
-class User(AbstractUser):
-	ROLE_CHOICES = [
-		("customer", "Customer"),
-		("owner", "Owner"),
-		("admin", "Admin"),
-	]
+# -------------------------
+# Owner Table
+# -------------------------
+class Owner(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=200)
 
-	display_name = models.CharField(max_length=150, blank=True)
-	role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="customer")
-	wallet_balance_cents = models.BigIntegerField(default=0)
-
-	def __str__(self):
-		return self.get_username() or self.display_name or str(self.pk)
+    def __str__(self):
+        return self.name
 
 
-class BottleSlot(models.Model):
-	slot_number = models.PositiveSmallIntegerField(unique=True)
-	bottle_name = models.CharField(max_length=200, blank=True)
-	current_volume_ml = models.FloatField(default=0.0)
-	capacity_ml = models.FloatField(default=1000.0)
-	is_enabled = models.BooleanField(default=True)
-	last_refill_at = models.DateTimeField(null=True, blank=True)
-	calibration = models.JSONField(null=True, blank=True)
+# -------------------------
+# Customer Table
+# -------------------------
+class Customer(models.Model):
+    # Auto ID is created by Django automatically (id = PK)
+    name = models.CharField(max_length=200)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=200)
 
-	def percent_full(self):
-		if not self.capacity_ml:
-			return 0
-		return max(0.0, min(100.0, (self.current_volume_ml / self.capacity_ml) * 100.0))
-
-	def __str__(self):
-		return f"Slot {self.slot_number}: {self.bottle_name or 'Empty'}"
+    def __str__(self):
+        return self.name
 
 
-class DrinkRecipe(models.Model):
-	name = models.CharField(max_length=200)
-	description = models.TextField(blank=True)
-	price_cents = models.BigIntegerField(default=0)
-	estimated_volume_ml = models.FloatField(default=250.0)
-	created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-	is_active = models.BooleanField(default=True)
-	created_at = models.DateTimeField(default=timezone.now)
-	updated_at = models.DateTimeField(auto_now=True)
-
-	slots = models.ManyToManyField(BottleSlot, through="RecipeIngredient", related_name="recipes")
-
-	def __str__(self):
-		return self.name
-
-
-class RecipeIngredient(models.Model):
-	recipe = models.ForeignKey(DrinkRecipe, on_delete=models.CASCADE)
-	slot = models.ForeignKey(BottleSlot, on_delete=models.CASCADE)
-	# percentage of the total recipe volume contributed by this slot (0-100)
-	percent = models.FloatField()
-
-	class Meta:
-		unique_together = ("recipe", "slot")
-
-
-class Purchase(models.Model):
-	PAYMENT_METHODS = [
-		("card", "Card"),
-		("cash", "Cash"),
-		("wallet", "Wallet"),
-		("mobile", "MobilePay"),
-	]
-
-	STATUS_CHOICES = [
-		("pending", "Pending"),
-		("completed", "Completed"),
-		("failed", "Failed"),
-		("refunded", "Refunded"),
-	]
-
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-	recipe = models.ForeignKey(DrinkRecipe, on_delete=models.PROTECT)
-	amount_paid_cents = models.BigIntegerField()
-	price_at_purchase_cents = models.BigIntegerField()
-	quantity = models.PositiveSmallIntegerField(default=1)
-	timestamp = models.DateTimeField(default=timezone.now)
-	payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-	transaction_metadata = models.JSONField(null=True, blank=True)
-
-	slots = models.ManyToManyField(BottleSlot, through="PurchaseBottle", related_name="purchases")
-
-	def __str__(self):
-		return f"Purchase {self.pk} - {self.recipe.name} @ {self.timestamp.isoformat()}"
-
-
-class PurchaseBottle(models.Model):
-	purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
-	slot = models.ForeignKey(BottleSlot, on_delete=models.PROTECT)
-	volume_ml = models.FloatField()
-
-	class Meta:
-		unique_together = ("purchase", "slot")
-
-
+# -------------------------
+# Daily Count Table
+# -------------------------
 class DailyCount(models.Model):
-	date = models.DateField()
-	owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-	total_sales_count = models.PositiveIntegerField(default=0)
-	total_revenue_cents = models.BigIntegerField(default=0)
-	per_recipe_counts = models.JSONField(default=dict, blank=True)
-	updated_at = models.DateTimeField(auto_now=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    amount = models.FloatField()
 
-	class Meta:
-		unique_together = ("date", "owner")
-
-	def __str__(self):
-		return f"DailyCount {self.date} - sales {self.total_sales_count}"
+    def __str__(self):
+        return f"{self.timestamp} - {self.customer.name} - {self.amount}"
 
 
-class Telemetry(models.Model):
-	device_id = models.CharField(max_length=200, blank=True)
-	timestamp = models.DateTimeField(default=timezone.now, db_index=True)
-	type = models.CharField(max_length=50)
-	value = models.JSONField()
+# -------------------------
+# Bottle Slot Table
+# -------------------------
+class BottleSlot(models.Model):
+    """Represents a physical bottle slot (1..12) and the liquid stored inside it.
 
-	def __str__(self):
-		return f"Telemetry {self.type} @ {self.timestamp.isoformat()}"
+    Owners can update `liquid_name` at any time; recipes refer to bottle numbers.
+    """
+    bottle_number = models.PositiveSmallIntegerField(primary_key=True)
+    liquid_name = models.CharField(max_length=200, default="Empty")
+
+    class Meta:
+        ordering = ["bottle_number"]
+
+    def __str__(self):
+        return f"{self.bottle_number}: {self.liquid_name}"
 
 
-class WalletTransaction(models.Model):
-	TRANSACTION_TYPES = [
-		("topup", "Top Up"),
-		("charge", "Charge"),
-		("refund", "Refund"),
-	]
+# -------------------------
+# Recipe Table
+# -------------------------
+class Recipe(models.Model):
+    """Simple recipe that stores ml volumes per bottle slot (1..12).
 
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-	amount_cents = models.BigIntegerField()
-	type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
-	timestamp = models.DateTimeField(default=timezone.now)
-	metadata = models.JSONField(null=True, blank=True)
+    Primary key is `recipe_name`. Each `bottle_X` field holds an integer (ml).
+    If a recipe does not use a particular bottle, that field is 0.
+    """
+    recipe_name = models.CharField(max_length=200, primary_key=True)
+    bottle_1 = models.PositiveIntegerField(default=0)
+    bottle_2 = models.PositiveIntegerField(default=0)
+    bottle_3 = models.PositiveIntegerField(default=0)
+    bottle_4 = models.PositiveIntegerField(default=0)
+    bottle_5 = models.PositiveIntegerField(default=0)
+    bottle_6 = models.PositiveIntegerField(default=0)
+    bottle_7 = models.PositiveIntegerField(default=0)
+    bottle_8 = models.PositiveIntegerField(default=0)
+    bottle_9 = models.PositiveIntegerField(default=0)
+    bottle_10 = models.PositiveIntegerField(default=0)
+    bottle_11 = models.PositiveIntegerField(default=0)
+    bottle_12 = models.PositiveIntegerField(default=0)
+    # price in smallest currency unit (e.g., rupees as integer). Default 10.
+    price = models.PositiveIntegerField(default=10)
+    # video preview URL (store as plain URL, do not embed HTML)
+    video_url = models.URLField(blank=True, default="")
 
-	def __str__(self):
-		return f"WalletTransaction {self.type} {self.amount_cents} for {self.user_id}"
+    def bottles(self):
+        """Return a list of (bottle_number, ml) tuples for this recipe."""
+        return [(i, getattr(self, f"bottle_{i}")) for i in range(1, 13)]
 
+    def used_bottles(self):
+        """Return a list of (bottle_number, ml) for non-zero bottles."""
+        return [(i, ml) for i, ml in self.bottles() if ml > 0]
+
+    def __str__(self):
+        return self.recipe_name
