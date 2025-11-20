@@ -10,14 +10,14 @@ export default function Start() {
       <main className="w-full max-w-md">
         <div className="bg-white/6 backdrop-blur-sm rounded-2xl p-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome</h1>
-          <p className="text-sm text-white/70 mb-6">Please choose how you'd like to proceed</p>
+          <p className="text-sm text-white/70 mb-6">Please choose how you&apos;d like to proceed</p>
 
           <div className="flex flex-col gap-4">
             <button
-              onClick={() => router.push('/login?role=customer')}
+              onClick={() => router.push('/products')}
               className="w-full py-3 rounded-xl bg-white text-zinc-900 font-semibold text-lg"
             >
-              Customer Login
+              Browse Drinks
             </button>
 
             <button

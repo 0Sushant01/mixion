@@ -3,18 +3,13 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import IdleTimer from "../components/IdleTimer";
-import { getCurrentCustomer, logout } from "../components/session";
+import { logout } from "../components/session";
 
 export default function AskPage() {
   const router = useRouter();
 
-  React.useEffect(() => {
-    const c = getCurrentCustomer();
-    if (!c) router.push("/login");
-  }, [router]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col shadow-2xl sm:rounded-3xl">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
