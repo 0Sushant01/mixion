@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import IdleTimer from "../components/IdleTimer";
-import { getCurrentCustomer, setSelectedRecipe, logout } from "../components/session";
+import { setSelectedRecipe, logout } from "../components/session";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api";
 
@@ -13,56 +13,108 @@ type Recipe = {
   video_url?: string;
 };
 
+type ApiRecipe = {
+  recipe_name: string;
+  price: number;
+  video_url?: string | null;
+};
+
+const FALLBACK_RECIPES: Recipe[] = [
+  {
+    recipe_name: "Electric Citrus",
+    price: 180,
+    video_url: "/idle.mp4",
+  },
+  {
+    recipe_name: "Velvet Mocha",
+    price: 220,
+    video_url: "/idle.mp4",
+  },
+  {
+    recipe_name: "Berry Breeze",
+    price: 160,
+    video_url: "/idle.mp4",
+  },
+];
+
 export default function ProductsPage() {
   const router = useRouter();
   const [recipes, setRecipes] = React.useState<Recipe[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = React.useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = React.useState<Date | null>(null);
+  const [isOfflineMenu, setIsOfflineMenu] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  React.useEffect(() => {
-    const c = getCurrentCustomer();
-    if (!c) return router.push("/login");
+  const mountedRef = React.useRef(true);
+  const hasFetchedRef = React.useRef(false);
 
-    let mounted = true;
+  const fetchRecipes = React.useCallback(async () => {
+    if (!mountedRef.current) return;
+    if (!hasFetchedRef.current) {
+      setLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+    setError(null);
+    setStatusMessage(null);
 
-    async function fetchRecipes() {
-      try {
-        const res = await fetch(`${API_BASE}/recipes/`);
-        if (!res.ok) throw new Error("fetch failed");
-        const data = await res.json();
-        if (!mounted) return;
-        // map backend fields to frontend shape
-        const mapped = data.map((r: any) => ({
+    try {
+      const res = await fetch(`${API_BASE}/recipes/`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const data = (await res.json()) as ApiRecipe[];
+      if (!mountedRef.current) return;
+
+      const mapped = data
+        .filter((r) => r?.recipe_name)
+        .map((r) => ({
           recipe_name: r.recipe_name,
           price: r.price,
           video_url: r.video_url || "/idle.mp4",
+          ingredients: (r as any).ingredients || (r as any).recipe_ingredients || [],
         }));
-        setRecipes(mapped);
-      } catch (e) {
-        console.error("Failed to load recipes", e);
-      } finally {
-        if (mounted) setLoading(false);
-      }
+
+      setRecipes(mapped);
+      setIsOfflineMenu(false);
+      setLastSyncedAt(new Date());
+      setStatusMessage(
+        mapped.length === 0
+          ? "The kiosk connected to the backend but no drinks were returned. Add recipes from the owner dashboard to make them appear here."
+          : null
+      );
+    } catch (e) {
+      if (!mountedRef.current) return;
+      const message = e instanceof Error ? e.message : "Unknown error";
+      setError(`Unable to reach the live menu at ${API_BASE}. ${message}`);
+      setRecipes(FALLBACK_RECIPES);
+      setIsOfflineMenu(true);
+      setStatusMessage("Showing the built-in demo menu while the backend is unreachable.");
+    } finally {
+      if (!mountedRef.current) return;
+      hasFetchedRef.current = true;
+      setLoading(false);
+      setIsRefreshing(false);
     }
+  }, []);
 
-    // Initial fetch
+  React.useEffect(() => {
+    mountedRef.current = true;
     fetchRecipes();
-
-    // Auto-refresh recipes every 10 seconds to get latest video URLs
     const interval = setInterval(fetchRecipes, 10000);
-
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       clearInterval(interval);
     };
-  }, [router]);
+  }, [fetchRecipes]);
 
-  function handleSelect(recipe: any) {
+  function handleSelect(recipe: Recipe) {
     setSelectedRecipe(recipe);
     router.push("/confirm");
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl sm:rounded-3xl">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -75,12 +127,60 @@ export default function ProductsPage() {
               <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
             </div>
             <button
-              onClick={() => logout((p) => router.push(p))}
-              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-sm font-medium transition-all"
+              onClick={fetchRecipes}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-2"
             >
-              Back
+              {isRefreshing ? (
+                <>
+                  <span className="h-3 w-3 border-2 border-white/40 border-t-white/90 rounded-full animate-spin" />
+                  Refreshing…
+                </>
+              ) : (
+                "Refresh"
+              )}
+            </button>
+            <button
+              onClick={() => router.push("/owner-login")}
+              className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 rounded-lg text-sm font-medium transition-all"
+            >
+              Owner Login
             </button>
           </div>
+        </div>
+        <div className="max-w-7xl mx-auto">
+          {error && (
+            <div className="mt-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-100 text-sm">
+              <div>
+                <p className="font-semibold">Live menu unavailable</p>
+                <p className="text-red-100/80">{error}</p>
+              </div>
+              <button
+                onClick={fetchRecipes}
+                className="px-3 py-2 rounded-lg bg-red-500/30 hover:bg-red-500/40 text-xs font-semibold tracking-wide uppercase"
+              >
+                Retry now
+              </button>
+            </div>
+          )}
+          {!error && statusMessage && (
+            <div
+              className={`mt-3 rounded-2xl border px-4 py-3 text-sm ${
+                isOfflineMenu
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-50"
+                  : "border-sky-500/40 bg-sky-500/10 text-sky-50"
+              }`}
+            >
+              {statusMessage}
+            </div>
+          )}
+          {lastSyncedAt && !isOfflineMenu && (
+            <div className="mt-2 text-xs text-white/60">Last synced: {lastSyncedAt.toLocaleTimeString()}</div>
+          )}
+          {isOfflineMenu && (
+            <div className="mt-2 text-xs text-amber-200/70">
+              Backend check: Tap Refresh to retry the live database once it’s online.
+            </div>
+          )}
         </div>
       </div>
 
@@ -134,7 +234,14 @@ export default function ProductsPage() {
                   <h3 className="text-2xl font-bold text-white group-hover:text-indigo-300 transition-colors">
                     {r.recipe_name}
                   </h3>
-                  <p className="text-gray-400 text-sm mt-2">Handcrafted beverage</p>
+                        <p className="text-gray-400 text-sm mt-2">Handcrafted beverage</p>
+                        <p className="text-xs text-gray-400 mt-2">
+                          {((r as any).ingredients || [])
+                            .slice(0, 3)
+                            .map((it: any) => (it.ingredient ? it.ingredient.name + ` ${it.amount_ml}ml` : (it.amount_ml ? `${it.amount_ml}ml` : "")))
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
 
                   {/* Price & CTA */}
                   <div className="mt-6 flex items-end justify-between">

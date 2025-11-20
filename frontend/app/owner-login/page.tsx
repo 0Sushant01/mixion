@@ -37,16 +37,58 @@ export default function OwnerLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-900 text-white p-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-md bg-white/5 p-8 rounded-2xl">
-        <h1 className="text-2xl font-semibold mb-4 text-center">Owner Login</h1>
-        <label className="block text-sm mb-2">Email</label>
-        <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full mb-4 p-3 rounded bg-white/10" />
-        <label className="block text-sm mb-2">Password</label>
-        <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="w-full mb-4 p-3 rounded bg-white/10" />
-        {error && <div className="text-red-400 mb-2">{error}</div>}
-        <button disabled={loading} className="w-full py-3 rounded bg-green-600 font-semibold">{loading ? 'Signing in...' : 'Sign in'}</button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-[#0f1112] text-white p-6">
+      <div className="w-full max-w-3xl px-6">
+        <div className="flex justify-center">
+          <div className="w-full max-w-lg bg-[#161619] border border-white/8 rounded-2xl p-10 shadow-xl">
+            <h1 className="text-3xl font-extrabold mb-6 text-center">Owner Login</h1>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm mb-2 text-gray-300">Email</label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 rounded bg-slate-100/10 border border-white/6 placeholder-gray-400 text-white"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm mb-2 text-gray-300">Password</label>
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  className="w-full p-3 rounded bg-slate-100/10 border border-white/6 placeholder-gray-400 text-white"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && <div className="text-red-400">{error}</div>}
+
+              <div>
+                <button
+                  disabled={loading}
+                  className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition font-semibold text-white text-lg"
+                >
+                  {loading ? "Signing in..." : "Sign in"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* bottom home button */}
+      <div className="fixed left-0 right-0 bottom-6 flex items-center justify-center pointer-events-auto">
+        <a
+          href="/"
+          className="px-6 py-3 bg-white/6 backdrop-blur-md border border-white/10 rounded-full text-white font-medium hover:bg-white/10 transition"
+        >
+          Home
+        </a>
+      </div>
     </div>
   );
 }

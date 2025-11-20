@@ -3,19 +3,17 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import IdleTimer from "../components/IdleTimer";
-import { getSelectedRecipe, getCurrentCustomer, logout } from "../components/session";
+import { getSelectedRecipe, logout, SessionRecipe } from "../components/session";
 
 type PaymentStatus = "idle" | "processing" | "dispensing";
 
 export default function PaymentPage() {
   const router = useRouter();
-  const [recipe, setRecipe] = React.useState<any>(null);
+  const [recipe, setRecipe] = React.useState<SessionRecipe | null>(null);
   const [status, setStatus] = React.useState<PaymentStatus>("idle");
   const [selectedMethod, setSelectedMethod] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    const c = getCurrentCustomer();
-    if (!c) return router.push("/login");
     const r = getSelectedRecipe();
     if (!r) return router.push("/products");
     setRecipe(r);
@@ -26,6 +24,33 @@ export default function PaymentPage() {
     setStatus("processing");
     await new Promise((res) => setTimeout(res, 1200));
     setStatus("dispensing");
+
+    // Record sale to backend (best-effort). Use NEXT_PUBLIC_API_BASE or default.
+    (async () => {
+      try {
+        const apiBase = (process.env.NEXT_PUBLIC_API_BASE as string) || "http://localhost:8000/api";
+        const payload: any = { recipe_name: recipe?.recipe_name, amount: recipe?.price };
+        // include machine id if configured via env var
+        try {
+          const machineId = (process.env.NEXT_PUBLIC_MACHINE_ID as string) || null;
+          if (machineId) payload.machine_id = machineId;
+        } catch {}
+        try {
+          const cur = JSON.parse(localStorage.getItem("current_customer") || "null");
+          if (cur && cur.id) payload.customer_id = cur.id;
+        } catch {}
+
+        await fetch(`${apiBase}/record_sale/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (e) {
+        // Ignore failures; this is a demo-friendly best-effort call.
+        // Optionally log to analytics in production.
+      }
+    })();
+
     await new Promise((res) => setTimeout(res, 2000));
     router.push("/ask");
   }
@@ -40,7 +65,7 @@ export default function PaymentPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col shadow-2xl sm:rounded-3xl">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">

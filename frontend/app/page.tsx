@@ -1,38 +1,32 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import IdleTimer from "./components/IdleTimer";
 
 export default function Home() {
   const router = useRouter();
-  const [showModal, setShowModal] = useState(false);
 
   function handleAnyClick() {
-    // On first user interaction: unmute the video so voice/audio in the video can play,
-    // then show the login options overlay. We don't immediately navigate so audio can play.
     const vid = document.getElementById("idle-video") as HTMLVideoElement | null;
     if (vid) {
       try {
         vid.muted = false;
-        // ensure play() is called as a result of user gesture
         vid.play().catch(() => {
           /* ignore play errors */
         });
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
-    setShowModal(true);
+    router.push("/products");
   }
 
   return (
     <div
       onClick={handleAnyClick}
-      className="min-h-screen flex items-center justify-center bg-zinc-900 text-white select-none"
+      className="relative h-[70vh] w-full cursor-pointer select-none overflow-hidden rounded-none bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#0e7490] text-white sm:h-[80vh] sm:rounded-3xl lg:h-[85vh] shadow-2xl animate-in fade-in"
     >
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="animate-gradient absolute inset-0 bg-gradient-to-tr from-[#ff7a7a] via-[#ffd47a] to-[#7afcff] opacity-60" />
+        <div className="animate-gradient absolute inset-0 bg-gradient-to-tr from-cyan-400 via-emerald-400 to-blue-400 opacity-60" />
         <svg
           className="absolute inset-0 w-full h-full"
           viewBox="0 0 800 600"
@@ -41,8 +35,8 @@ export default function Home() {
         >
           <defs>
             <linearGradient id="g" x1="0" x2="1">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.06" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0.02" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#000000" stopOpacity="0.04" />
             </linearGradient>
           </defs>
           <rect width="800" height="600" fill="url(#g)" />
@@ -60,59 +54,16 @@ export default function Home() {
           preload="auto"
         >
           <source src={process.env.NEXT_PUBLIC_IDLE_VIDEO || '/idle.mp4'} type="video/mp4" />
-          {/* fallback message */}
           Your browser does not support HTML5 video.
         </video>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <h1 className="text-5xl font-extrabold tracking-tight text-white drop-shadow-lg">Mixion</h1>
-          <p className="mt-3 text-white/80">Touch anywhere to begin</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
+          <h1 className="text-6xl font-extrabold tracking-tight text-transparent bg-gradient-to-r from-cyan-300 via-emerald-400 to-blue-400 bg-clip-text drop-shadow-2xl sm:text-7xl animate-in fade-in slide-in">
+            MIXION
+          </h1>
+          <p className="mt-6 text-xl text-cyan-100/90 sm:text-2xl font-medium animate-in fade-in slide-in">Touch anywhere to begin</p>
         </div>
       </div>
-
-      {/* When showModal is true we display the login overlay (Customer / Owner) on top of the video.
-          This lets the video's audio play after the user interacted (browsers require user gesture).
-      */}
-      {showModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          onClick={() => setShowModal(false)}
-        >
-          <div className="absolute inset-0 bg-black/60" />
-          <div
-            className="relative z-50 w-[min(720px,90%)] max-w-2xl rounded-2xl bg-white/5 backdrop-blur-sm p-8 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl font-semibold mb-4">Welcome — choose login</h2>
-            <p className="text-sm text-white/70 mb-6">Are you a customer or the owner?</p>
-
-            {/* Auto-refresh if no selection in 15s */}
-            <div className="absolute top-4 right-6">
-              <IdleTimer onTimeout={() => { window.location.reload(); }} timeoutSeconds={15} />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => router.push('/login')}
-                className="w-56 px-6 py-3 rounded-2xl bg-white text-zinc-900 text-lg font-medium shadow"
-              >
-                Customer
-              </button>
-
-              <button
-                onClick={() => router.push('/owner-login')}
-                className="w-56 px-6 py-3 rounded-2xl bg-transparent border border-white/30 text-white text-lg font-medium"
-              >
-                Owner
-              </button>
-            </div>
-
-            <div className="mt-6 text-xs text-white/60">Tap outside to cancel</div>
-          </div>
-        </div>
-      )}
 
       <style jsx>{`
         .animate-gradient {

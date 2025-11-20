@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import Owner, Customer, DailyCount, BottleSlot, Recipe
+from .models import Owner, Customer, DailyCount, BottleSlot, Recipe, Machine
+from .models import Ingredient, RecipeIngredient
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -34,16 +35,48 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 class DailyCountSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
+    # represent recipe by its primary key (recipe_name)
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    machine = serializers.PrimaryKeyRelatedField(queryset=Machine.objects.all(), allow_null=True, required=False)
 
     class Meta:
         model = DailyCount
-        fields = ["id", "timestamp", "customer", "amount"]
+        fields = ["id", "timestamp", "customer", "recipe", "amount", "machine"]
 
 
 class BottleSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = BottleSlot
-        fields = ["bottle_number", "liquid_name"]
+        fields = ["id", "bottle_number", "liquid_name", "machine"]
+
+
+class MachineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Machine
+        fields = ["machine_id", "owner", "label"]
+
+
+class BottleSlotAdminSerializer(serializers.ModelSerializer):
+    # helpful read-only view representation
+    machine = MachineSerializer(read_only=True)
+
+    class Meta:
+        model = BottleSlot
+        fields = ["id", "bottle_number", "liquid_name", "machine"]
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ["id", "name", "is_cold"]
+
+
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    ingredient = IngredientSerializer(read_only=True)
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ["id", "recipe", "ingredient", "amount_ml"]
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -51,18 +84,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = [
             "recipe_name",
-            "bottle_1",
-            "bottle_2",
-            "bottle_3",
-            "bottle_4",
-            "bottle_5",
-            "bottle_6",
-            "bottle_7",
-            "bottle_8",
-            "bottle_9",
-            "bottle_10",
-            "bottle_11",
-            "bottle_12",
             "price",
             "video_url",
+            "recipe_ingredients",
         ]
+
+    # include read-only list of ingredients when serializing
+    recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["ingredients"] = RecipeIngredientSerializer(instance.recipe_ingredients.all(), many=True).data
+        return data
