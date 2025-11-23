@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import IdleTimer from "../components/IdleTimer";
 import { getSelectedRecipe, logout, SessionRecipe } from "../components/session";
-
 export default function ConfirmPage() {
   const router = useRouter();
   const [recipe, setRecipe] = React.useState<SessionRecipe | null>(null);
@@ -18,15 +17,15 @@ export default function ConfirmPage() {
   if (!recipe) return null;
 
   return (
-    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col shadow-2xl sm:rounded-3xl">
+    <div className="min-h-screen w-full bg-white text-slate-900 flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      <div className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-gray-200 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Confirm Your Selection</h1>
-            <p className="text-gray-300 text-sm mt-1">Review before proceeding</p>
+            <h1 className="text-3xl font-bold text-slate-900">Confirm Your Selection</h1>
+            <p className="text-slate-600 text-sm mt-1">Review before proceeding</p>
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-slate-500">
             <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
           </div>
         </div>
@@ -34,33 +33,34 @@ export default function ConfirmPage() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/20 p-8 shadow-2xl animate-fadeIn">
+        <div className="w-full max-w-2xl bg-white/60 backdrop-blur-lg rounded-3xl border border-gray-200 p-8 shadow-sm animate-fadeIn">
           {/* Recipe Card */}
           <div className="text-center">
-            <div className="inline-block px-4 py-1 bg-indigo-500/20 rounded-full text-indigo-300 text-xs font-semibold uppercase tracking-wide mb-6">
+            <div className="inline-block px-4 py-1 bg-indigo-100 rounded-full text-indigo-700 text-xs font-semibold uppercase tracking-wide mb-6">
               Ready to Order
             </div>
 
-            <h2 className="text-5xl font-bold text-white mb-4">{recipe.recipe_name}</h2>
+            <h2 className="text-5xl font-bold text-slate-900 mb-4">{recipe.recipe_name}</h2>
 
-            {/* Video Preview */}
-            <div className="relative w-full h-72 rounded-2xl overflow-hidden mb-8 shadow-xl border border-white/10">
-              <video
-                src={recipe.video_url}
-                className="w-full h-full object-cover"
-                muted
-                loop
-                autoPlay
-              >
-                <source src={recipe.video_url} />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-40" />
+            {/* Media Preview */}
+            <div className="relative w-full h-72 rounded-2xl overflow-hidden mb-8 shadow-md border border-gray-100">
+              {recipe.image_url ? (
+                <img src={recipe.image_url as string} alt={recipe.recipe_name} className="w-full h-full object-cover" />
+              ) : /\.(png|jpe?g|webp|svg|gif)(\?|$)/i.test(recipe.video_url || "") ? (
+                <img src={recipe.video_url as string} alt={recipe.recipe_name} className="w-full h-full object-cover" />
+              ) : (
+                <video src={recipe.video_url} className="w-full h-full object-cover" muted loop autoPlay>
+                  <source src={recipe.video_url} />
+                </video>
+              )}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent opacity-40" />
             </div>
 
             {/* Price Display */}
             <div className="mb-8">
-              <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">Total Amount</p>
-              <p className="text-6xl font-bold text-indigo-300">₹{recipe.price}</p>
+              <p className="text-slate-500 text-sm uppercase tracking-wide mb-2">Total Amount</p>
+              <p className="text-6xl font-bold text-indigo-600">₹{recipe.price}</p>
             </div>
 
             {/* Buttons */}
@@ -73,7 +73,7 @@ export default function ConfirmPage() {
               </button>
               <button
                 onClick={() => router.push("/products")}
-                className="flex-1 px-6 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/20 transition-all"
+                className="flex-1 px-6 py-4 bg-white text-slate-800 font-semibold rounded-xl border border-gray-200 transition-all hover:shadow-sm"
               >
                 Back to Menu
               </button>

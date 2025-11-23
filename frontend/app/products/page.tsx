@@ -11,12 +11,14 @@ type Recipe = {
   recipe_name: string;
   price: number;
   video_url?: string;
+  image_url?: string;
 };
 
 type ApiRecipe = {
   recipe_name: string;
   price: number;
   video_url?: string | null;
+  image_url?: string | null;
 };
 
 const FALLBACK_RECIPES: Recipe[] = [
@@ -68,12 +70,20 @@ export default function ProductsPage() {
 
       const mapped = data
         .filter((r) => r?.recipe_name)
-        .map((r) => ({
-          recipe_name: r.recipe_name,
-          price: r.price,
-          video_url: r.video_url || "/idle.mp4",
-          ingredients: (r as any).ingredients || (r as any).recipe_ingredients || [],
-        }));
+        .map((r) => {
+          // Some installs may store a static image URL in `video_url` (admin-entered).
+          // If `video_url` points to an image file, prefer it as `image_url`.
+          const possibleVideo = r.video_url || "";
+          const looksLikeImage = /\.(png|jpe?g|webp|svg|gif)(\?|$)/i.test(possibleVideo);
+          const explicitImage = (r as any).image_url || (r as any).image || null;
+          return {
+            recipe_name: r.recipe_name,
+            price: r.price,
+            image_url: explicitImage || (looksLikeImage ? possibleVideo : null),
+            video_url: (!looksLikeImage && r.video_url) ? r.video_url : "/idle.mp4",
+            ingredients: (r as any).ingredients || (r as any).recipe_ingredients || [],
+          };
+        });
 
       setRecipes(mapped);
       setIsOfflineMenu(false);
@@ -113,90 +123,51 @@ export default function ProductsPage() {
     router.push("/confirm");
   }
 
-  return (
-    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl sm:rounded-3xl">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Select Your Drink</h1>
-            <p className="text-gray-300 text-sm mt-1">Touch to choose</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-gray-400">
-              <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
-            </div>
-            <button
-              onClick={fetchRecipes}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-2"
-            >
-              {isRefreshing ? (
-                <>
-                  <span className="h-3 w-3 border-2 border-white/40 border-t-white/90 rounded-full animate-spin" />
-                  Refreshing…
-                </>
-              ) : (
-                "Refresh"
-              )}
-            </button>
-            <button
-              onClick={() => router.push("/owner-login")}
-              className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 rounded-lg text-sm font-medium transition-all"
-            >
-              Owner Login
-            </button>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto">
-          {error && (
-            <div className="mt-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-100 text-sm">
-              <div>
-                <p className="font-semibold">Live menu unavailable</p>
-                <p className="text-red-100/80">{error}</p>
-              </div>
-              <button
-                onClick={fetchRecipes}
-                className="px-3 py-2 rounded-lg bg-red-500/30 hover:bg-red-500/40 text-xs font-semibold tracking-wide uppercase"
-              >
-                Retry now
-              </button>
-            </div>
-          )}
-          {!error && statusMessage && (
-            <div
-              className={`mt-3 rounded-2xl border px-4 py-3 text-sm ${
-                isOfflineMenu
-                  ? "border-amber-500/40 bg-amber-500/10 text-amber-50"
-                  : "border-sky-500/40 bg-sky-500/10 text-sky-50"
-              }`}
-            >
-              {statusMessage}
-            </div>
-          )}
-          {lastSyncedAt && !isOfflineMenu && (
-            <div className="mt-2 text-xs text-white/60">Last synced: {lastSyncedAt.toLocaleTimeString()}</div>
-          )}
-          {isOfflineMenu && (
-            <div className="mt-2 text-xs text-amber-200/70">
-              Backend check: Tap Refresh to retry the live database once it’s online.
-            </div>
-          )}
-        </div>
-      </div>
+  // number of columns to show on wide screens (1..3)
+  const cols = Math.min(3, Math.max(1, recipes.length || 1));
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+  return (
+    <div className="fixed inset-0 h-screen w-screen bg-white text-slate-900 overflow-auto">
+      {/* Header - overlayed, minimal and transparent */}
+      <header className="absolute top-0 left-0 right-0 h-20 z-40 flex items-center justify-between px-8 backdrop-blur-md bg-white/60 border-b border-gray-200">
+        <div className="flex flex-col">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Select Your Drink</h1>
+          <p className="text-sm text-slate-600 mt-1">Handcrafted. Premium. MIXION.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-xs text-white/40">
+            <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
+          </div>
+          <button
+            onClick={fetchRecipes}
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-xl text-sm font-medium transition-all border border-gray-200 shadow-sm"
+          >
+            {isRefreshing ? <span className="animate-spin h-3 w-3 border-2 border-slate-300 border-t-slate-700 rounded-full" /> : "Refresh"}
+          </button>
+          <button
+            onClick={() => router.push('/owner-login')}
+            className="px-3 py-2 bg-transparent hover:bg-white/6 text-white rounded-xl text-sm font-medium transition-all border border-white/6"
+          >
+            Owner Login
+          </button>
+        </div>
+      </header>
+
+      <main className="w-full h-full p-0 pt-20">
+        {/* compute columns dynamically: max 3 columns on large screens, but adapt when there are fewer recipes */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white/5 rounded-lg overflow-hidden animate-pulse">
-                <div className="w-full h-56 bg-white/10" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-white/10 rounded w-3/4" />
-                  <div className="h-3 bg-white/10 rounded w-1/2" />
+          <div className="w-full h-full p-6 box-border">
+            <div style={{ display: "grid", gap: "1.25rem", gridTemplateColumns: `repeat(${Math.min(3, 3)}, minmax(0, 1fr))` }}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="rounded-3xl overflow-hidden animate-pulse bg-slate-50 border border-gray-200 shadow-sm h-96">
+                  <div className="w-full h-2/3 bg-slate-100" />
+                  <div className="p-6 space-y-4">
+                    <div className="h-5 bg-slate-100 rounded w-2/3" />
+                    <div className="h-4 bg-slate-100 rounded w-1/2" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
@@ -207,61 +178,85 @@ export default function ProductsPage() {
         )}
 
         {!loading && recipes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recipes.map((r) => (
-              <div
-                key={r.recipe_name}
-                onClick={() => handleSelect(r)}
-                className="group cursor-pointer bg-gradient-to-br from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 rounded-2xl overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/20"
-              >
-                {/* Video Container */}
-                <div className="relative w-full h-56 overflow-hidden bg-gradient-to-br from-indigo-500/20 to-pink-500/20">
-                  <video
-                    src={r.video_url}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    muted
-                    loop
-                    autoPlay
-                  >
-                    <source src={r.video_url} />
-                  </video>
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                </div>
+          <div className="w-full h-full p-6 box-border">
+            <div
+              style={{
+                display: "grid",
+                gap: "1.25rem",
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+                alignContent: "start",
+              }}
+            >
+              {recipes.map((r) => (
+                <article
+                  key={r.recipe_name}
+                  onClick={() => handleSelect(r)}
+                  className="group cursor-pointer rounded-3xl overflow-hidden border border-gray-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                >
+                  {/* Media */}
+                  <div className="relative w-full h-60 md:h-64 lg:h-72 overflow-hidden bg-slate-50">
+                    {((r as any).image_url) ? (
+                      <img
+                        src={(r as any).image_url}
+                        alt={r.recipe_name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : /\.(png|jpe?g|webp|svg|gif)(\?|$)/i.test(r.video_url || "") ? (
+                      <img
+                        src={r.video_url}
+                        alt={r.recipe_name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <video
+                        src={r.video_url}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        muted
+                        loop
+                        autoPlay
+                      />
+                    )}
 
-                {/* Content */}
-                <div className="p-6 relative">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-indigo-300 transition-colors">
-                    {r.recipe_name}
-                  </h3>
-                        <p className="text-gray-400 text-sm mt-2">Handcrafted beverage</p>
-                        <p className="text-xs text-gray-400 mt-2">
-                          {((r as any).ingredients || [])
-                            .slice(0, 3)
-                            .map((it: any) => (it.ingredient ? it.ingredient.name + ` ${it.amount_ml}ml` : (it.amount_ml ? `${it.amount_ml}ml` : "")))
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-
-                  {/* Price & CTA */}
-                  <div className="mt-6 flex items-end justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">Price</p>
-                      <p className="text-3xl font-bold text-indigo-300 mt-1">₹{r.price}</p>
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-4 left-6 w-44 h-24 rounded-full bg-white/40 blur-2xl opacity-20 transform -rotate-12" />
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelect(r);
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-indigo-500/50 transition-all transform group-hover:translate-y-0 group-hover:scale-110"
-                    >
-                      Select
-                    </button>
                   </div>
-                </div>
-              </div>
-            ))}
+
+                  {/* Body */}
+                  <div className="p-6 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{r.recipe_name}</h3>
+                      <p className="text-xs text-slate-500 mt-3">
+                        {((r as any).ingredients || [])
+                          .slice(0, 3)
+                          .map((it: any) => (it.ingredient ? it.ingredient.name + ` ${it.amount_ml}ml` : it.amount_ml ? `${it.amount_ml}ml` : ""))
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase tracking-wider">Price</p>
+                        <p className="text-4xl font-extrabold text-indigo-700 mt-1">₹{r.price}</p>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelect(r);
+                        }}
+                        className="relative px-8 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-indigo-500 to-pink-500 shadow-[0_18px_40px_rgba(99,102,241,0.14)] transition-all transform hover:scale-105"
+                        aria-label={`Select ${r.recipe_name}`}
+                      >
+                        <span className="absolute inset-0 rounded-full opacity-20 blur-xl mix-blend-screen" />
+                        <span className="relative z-10">Select</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         )}
       </main>
