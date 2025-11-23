@@ -9,6 +9,7 @@ export type SessionRecipe = {
   recipe_name: string;
   price: number;
   video_url?: string;
+  image_url?: string | null;
   [key: string]: unknown;
 };
 

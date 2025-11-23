@@ -65,15 +65,15 @@ export default function PaymentPage() {
   ];
 
   return (
-    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col shadow-2xl sm:rounded-3xl">
+    <div className="min-h-screen w-full bg-white text-slate-900 flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      <div className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-gray-200 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Payment</h1>
-            <p className="text-gray-300 text-sm mt-1">Choose your payment method</p>
+            <h1 className="text-3xl font-bold text-slate-900">Payment</h1>
+            <p className="text-slate-600 text-sm mt-1">Choose your payment method</p>
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-slate-500">
             <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
           </div>
         </div>
@@ -81,18 +81,18 @@ export default function PaymentPage() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/20 p-8 shadow-2xl">
+        <div className="w-full max-w-2xl bg-white/60 backdrop-blur-lg rounded-3xl border border-gray-200 p-8 shadow-sm">
           {status === "idle" && (
             <div className="animate-fadeIn">
               {/* Order Summary */}
-              <div className="mb-8 p-6 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
-                <p className="text-gray-300 text-sm uppercase tracking-wide mb-2">Order Summary</p>
-                <h2 className="text-3xl font-bold text-white mb-2">{recipe.recipe_name}</h2>
-                <p className="text-4xl font-bold text-indigo-300">₹{recipe.price}</p>
+              <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-gray-100">
+                <p className="text-slate-500 text-sm uppercase tracking-wide mb-2">Order Summary</p>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">{recipe.recipe_name}</h2>
+                <p className="text-4xl font-bold text-indigo-600">₹{recipe.price}</p>
               </div>
 
               {/* Payment Methods */}
-              <p className="text-gray-300 text-sm uppercase tracking-wide mb-4">Select Payment Method</p>
+              <p className="text-slate-600 text-sm uppercase tracking-wide mb-4">Select Payment Method</p>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {paymentMethods.map((method) => (
                   <button
@@ -100,12 +100,12 @@ export default function PaymentPage() {
                     onClick={() => doPayment(method.id)}
                     className={`group relative p-4 rounded-xl border-2 transition-all transform hover:scale-105 ${
                       selectedMethod === method.id
-                        ? `bg-gradient-to-r ${method.gradient} border-white/30 shadow-lg`
-                        : "bg-white/5 border-white/10 hover:border-white/30"
+                        ? `bg-gradient-to-r ${method.gradient} border-white/30 shadow-lg text-white`
+                        : "bg-white border-gray-100 hover:border-gray-200 text-slate-800"
                     }`}
                   >
                     <div className="text-3xl mb-2">{method.icon}</div>
-                    <p className="text-white font-semibold">{method.label}</p>
+                    <p className={`${selectedMethod === method.id ? 'text-white font-semibold' : 'font-semibold'}`}>{method.label}</p>
                   </button>
                 ))}
               </div>
@@ -113,7 +113,7 @@ export default function PaymentPage() {
               {/* Cancel Button */}
               <button
                 onClick={() => router.push("/products")}
-                className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition-all"
+                className="w-full px-6 py-3 bg-white text-slate-800 font-semibold rounded-xl border border-gray-200 transition-all hover:shadow-sm"
               >
                 Cancel
               </button>
@@ -123,19 +123,19 @@ export default function PaymentPage() {
           {status === "processing" && (
             <div className="animate-fadeIn text-center py-12">
               <div className="inline-block mb-6">
-                <div className="w-16 h-16 rounded-full border-4 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+                <div className="w-16 h-16 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
               </div>
-              <p className="text-2xl font-bold text-white mb-2">Processing Payment</p>
-              <p className="text-gray-400">Please wait...</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Processing Payment</p>
+              <p className="text-slate-600">Please wait...</p>
             </div>
           )}
 
           {status === "dispensing" && (
             <div className="animate-fadeIn text-center py-12">
               <div className="text-5xl mb-4">✨</div>
-              <p className="text-2xl font-bold text-white mb-2">Payment Successful!</p>
-              <p className="text-green-300 mb-6">Your drink is being prepared...</p>
-              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+              <p className="text-2xl font-bold text-slate-900 mb-2">Payment Successful!</p>
+              <p className="text-green-600 mb-6">Your drink is being prepared...</p>
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 animate-pulse" />
               </div>
             </div>

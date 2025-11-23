@@ -235,34 +235,34 @@ export default function OwnerDashboardPage() {
   const totalRevenue = dailyCounts.reduce((sum, d) => sum + (d.amount || 0), 0);
 
   return (
-    <div className="min-h-[70vh] rounded-none bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#0e7490] shadow-2xl sm:rounded-3xl animate-in fade-in">
+    <div className="min-h-[70vh] rounded-none bg-white text-slate-900 shadow-sm sm:rounded-3xl">
       {/* Header Bar */}
-      <header className="bg-gradient-to-r from-cyan-900/40 to-emerald-900/40 backdrop-blur-xl border-b border-cyan-400/20 sticky top-0 z-40 shadow-xl">
+      <header className="bg-white/60 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-emerald-400 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg">M</div>
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-emerald-300 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow">M</div>
             <div>
-              <h1 className="text-2xl font-extrabold text-cyan-200 drop-shadow">MIXION Owner</h1>
-              <p className="text-xs text-cyan-100/80">{owner?.name || "Loading..."}</p>
+              <h1 className="text-2xl font-extrabold text-slate-900">MIXION Owner</h1>
+              <p className="text-xs text-slate-600">{owner?.name || "Loading..."}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={openAdd}
-              className="px-5 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-transform"
+              className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold shadow-sm hover:scale-105 transition-transform"
             >
               + Add Recipe
             </button>
             <button
               onClick={() => router.push('/owner/ingredients')}
-              className="px-5 py-2 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-100 rounded-xl font-bold shadow hover:from-cyan-500/40 hover:to-emerald-500/40 transition-all"
+              className="px-5 py-2 bg-white border border-gray-200 text-slate-700 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-all"
             >
               🌿 Manage Ingredients
             </button>
             <button
               onClick={() => setShowBottleEditor(true)}
-              className="px-5 py-2 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-100 rounded-xl font-bold shadow hover:from-cyan-500/40 hover:to-emerald-500/40 transition-all"
+              className="px-5 py-2 bg-white border border-gray-200 text-slate-700 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-all"
             >
               🍾 Edit Bottles
             </button>
@@ -286,14 +286,14 @@ export default function OwnerDashboardPage() {
                     }
                   })();
                 }}
-                className="px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 text-cyan-100 rounded-xl border border-cyan-400/20 shadow"
+                className="px-4 py-2 bg-white border border-gray-200 text-slate-700 rounded-xl shadow-sm"
               >
                 {machines.map((m) => (
                   <option key={m.machine_id} value={m.machine_id}>{m.label || m.machine_id}</option>
                 ))}
               </select>
             )}
-            <div className="text-xs text-cyan-100/60">
+            <div className="text-xs text-slate-600">
               <IdleTimer
                 onTimeout={() => {
                   logout({ navigate: (p) => router.push(p), destination: "/owner-login" });
@@ -305,7 +305,7 @@ export default function OwnerDashboardPage() {
               onClick={() => {
                 logout({ navigate: (p) => router.push(p), destination: "/owner-login" });
               }}
-              className="px-4 py-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-200 rounded-xl text-sm font-bold shadow hover:scale-105 transition-transform"
+              className="px-4 py-2 bg-white border border-gray-200 text-red-600 rounded-xl text-sm font-bold shadow-sm hover:scale-105 transition-transform"
             >
               Logout
             </button>
@@ -319,71 +319,81 @@ export default function OwnerDashboardPage() {
           {/* Left Column: Recipes */}
           <div className="lg:col-span-2">
             <div className="mb-8">
-              <h2 className="text-3xl font-extrabold text-cyan-200 mb-2 drop-shadow">Recipes</h2>
-              <p className="text-cyan-100/80 text-lg">Manage your drink recipes and ingredients</p>
+              <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Recipes</h2>
+              <p className="text-slate-600 text-lg">Manage your drink recipes and ingredients</p>
             </div>
 
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 rounded-xl p-6 animate-pulse shadow-lg">
-                    <div className="w-28 h-20 bg-cyan-500/10 rounded mb-3" />
-                    <div className="h-4 bg-cyan-500/10 rounded mb-2 w-2/3" />
-                    <div className="h-3 bg-cyan-500/10 rounded w-1/2" />
+                  <div key={i} className="bg-white/60 rounded-xl p-6 animate-pulse shadow-sm border border-gray-100">
+                    <div className="w-28 h-20 bg-gray-100 rounded mb-3" />
+                    <div className="h-4 bg-gray-100 rounded mb-2 w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
                   </div>
                 ))}
               </div>
             )}
 
             {!loading && recipes.length === 0 && (
-              <div className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 rounded-xl p-12 text-center shadow-lg">
-                <p className="text-cyan-100/80 text-lg">No recipes yet. Create one to get started!</p>
+              <div className="bg-white/60 rounded-xl p-12 text-center shadow-sm border border-gray-100">
+                <p className="text-slate-600 text-lg">No recipes yet. Create one to get started!</p>
               </div>
             )}
 
             {!loading && recipes.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {recipes.map((r) => (
-                  <div
-                    key={r.recipe_name}
-                    className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 rounded-xl p-6 border border-cyan-400/10 hover:border-cyan-400/30 transition-all group shadow-lg animate-in fade-in"
-                  >
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="w-24 h-18 bg-gradient-to-br from-cyan-400/20 to-emerald-400/20 rounded-xl overflow-hidden flex-shrink-0 shadow">
-                        {r.video_url ? (
-                          <video src={r.video_url} className="w-full h-full object-cover" muted loop />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-cyan-100/30 text-3xl">🎬</div>
-                        )}
+                {recipes.map((r) => {
+                  const possibleVideo = (r as any).video_url || "";
+                  const looksLikeImage = /\.(png|jpe?g|webp|svg|gif)(\?|$)/i.test(possibleVideo);
+                  const explicitImage = (r as any).image_url || (r as any).image || null;
+
+                  return (
+                    <div
+                      key={r.recipe_name}
+                      className="bg-white/60 rounded-xl p-6 border border-gray-100 transition-all group shadow-sm"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-24 h-18 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+                          {explicitImage ? (
+                            <img src={explicitImage as string} alt={r.recipe_name} className="w-full h-full object-cover" />
+                          ) : looksLikeImage ? (
+                            <img src={possibleVideo} alt={r.recipe_name} className="w-full h-full object-cover" />
+                          ) : r.video_url ? (
+                            <video src={r.video_url} className="w-full h-full object-cover" muted loop />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400 text-3xl">🎬</div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-slate-900 text-xl">{r.recipe_name}</h3>
+                          <p className="text-indigo-600 text-lg font-bold">₹{r.price}</p>
+                          <p className="text-xs text-slate-600 mt-2">
+                            {((r as any).ingredients || (r as any).recipe_ingredients || [])
+                              .map((it: any) => (it.ingredient ? `${it.ingredient.name}: ${it.amount_ml}ml` : `${it.amount_ml}ml`))
+                              .filter(Boolean)
+                              .slice(0, 3)
+                              .join(", ")}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-cyan-200 text-xl drop-shadow">{r.recipe_name}</h3>
-                        <p className="text-emerald-300 text-lg font-bold">₹{r.price}</p>
-                        <p className="text-xs text-cyan-100/80 mt-2">
-                          {((r as any).ingredients || (r as any).recipe_ingredients || [])
-                            .map((it: any) => (it.ingredient ? `${it.ingredient.name}: ${it.amount_ml}ml` : `${it.amount_ml}ml`))
-                            .filter(Boolean)
-                            .slice(0, 3)
-                            .join(", ")}
-                        </p>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => openEdit(r)}
+                          className="flex-1 px-3 py-2 bg-white border border-gray-200 text-slate-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-gray-50 transition-transform"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm({ name: r.recipe_name })}
+                          className="flex-1 px-3 py-2 bg-white border border-gray-200 text-red-600 rounded-xl text-sm font-semibold shadow-sm hover:bg-gray-50 transition-transform"
+                        >
+                          🗑️ Delete
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => openEdit(r)}
-                        className="flex-1 px-3 py-2 bg-gradient-to-r from-yellow-500/20 to-yellow-500/40 text-yellow-300 rounded-xl text-sm font-bold shadow hover:scale-105 transition-transform"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm({ name: r.recipe_name })}
-                        className="flex-1 px-3 py-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-300 rounded-xl text-sm font-bold shadow hover:scale-105 transition-transform"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -391,39 +401,39 @@ export default function OwnerDashboardPage() {
           {/* Right Column: Analytics */}
           <div>
             <div className="mb-8">
-              <h2 className="text-3xl font-extrabold text-cyan-200 mb-2 drop-shadow">Today’s Summary</h2>
-              <p className="text-cyan-100/80 text-lg">Real-time sales metrics</p>
+              <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Today’s Summary</h2>
+              <p className="text-slate-600 text-lg">Real-time sales metrics</p>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 rounded-xl p-6 border border-emerald-400/30 shadow-lg">
-                <p className="text-emerald-300 text-lg font-bold">Sales Count</p>
-                <p className="text-4xl font-extrabold text-cyan-200 mt-2 drop-shadow">{dailyCounts.length}</p>
+              <div className="bg-white/60 rounded-xl p-6 border border-gray-100 shadow-sm">
+                <p className="text-slate-700 text-lg font-bold">Sales Count</p>
+                <p className="text-4xl font-extrabold text-slate-900 mt-2">{dailyCounts.length}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-xl p-6 border border-cyan-400/30 shadow-lg">
-                <p className="text-cyan-300 text-lg font-bold">Total Revenue</p>
-                <p className="text-4xl font-extrabold text-emerald-300 mt-2 drop-shadow">₹{totalRevenue}</p>
+              <div className="bg-white/60 rounded-xl p-6 border border-gray-100 shadow-sm">
+                <p className="text-slate-700 text-lg font-bold">Total Revenue</p>
+                <p className="text-4xl font-extrabold text-indigo-700 mt-2">₹{totalRevenue}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 rounded-xl p-6 border border-cyan-400/10 max-h-64 overflow-auto shadow-lg">
+              <div className="bg-white/60 rounded-xl p-6 border border-gray-100 max-h-64 overflow-auto shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-cyan-200 font-bold text-lg">Recent Transactions</p>
+                  <p className="text-slate-900 font-bold text-lg">Recent Transactions</p>
                   <button
                     onClick={() => router.push('/owner/sales-details')}
-                    className="text-xs px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-xl text-cyan-100 font-bold shadow hover:from-cyan-500/40 hover:to-emerald-500/40 transition-all"
+                    className="text-xs px-4 py-2 bg-white border border-gray-200 rounded-xl text-slate-700 font-bold shadow-sm hover:bg-gray-50 transition-all"
                   >
                     View Sales Details
                   </button>
                 </div>
                 {dailyCounts.length === 0 ? (
-                  <p className="text-cyan-100/80 text-xs">No sales yet</p>
+                  <p className="text-slate-600 text-xs">No sales yet</p>
                 ) : (
                   <div className="space-y-2">
                     {dailyCounts.slice(0, 8).map((d, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-xs text-cyan-100 pb-2 border-b border-cyan-400/10">
+                      <div key={idx} className="flex justify-between items-center text-xs text-slate-700 pb-2 border-b border-gray-100">
                         <span className="font-mono">{new Date(d.timestamp).toLocaleTimeString()}</span>
-                        <span className="text-emerald-300 font-bold">+₹{d.amount}</span>
+                        <span className="text-indigo-600 font-bold">+₹{d.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -435,15 +445,15 @@ export default function OwnerDashboardPage() {
       </main>
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-lg p-6 w-96 animate-in fade-in scale-in">
-            <h3 className="text-xl font-bold text-white mb-2">Delete Recipe?</h3>
-            <p className="text-gray-300 mb-4">
+          <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-lg p-6 w-96 animate-in fade-in scale-in">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Recipe?</h3>
+            <p className="text-slate-600 mb-4">
               Are you sure you want to delete <strong>{deleteConfirm?.name}</strong>? You can undo this action for 5 seconds.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all"
+                className="flex-1 px-4 py-2 bg-white border border-gray-200 text-slate-700 rounded-lg font-medium transition-all"
               >
                 Cancel
               </button>
@@ -460,12 +470,12 @@ export default function OwnerDashboardPage() {
 
       {/* Sales Details Modal */}
       {showSalesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg w-[min(800px,95%)] max-h-[80vh] overflow-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg w-[min(800px,95%)] max-h-[80vh] overflow-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Sales Details</h3>
-                <button onClick={() => setShowSalesModal(false)} className="text-sm text-gray-300">Close</button>
+                <h3 className="text-xl font-bold text-slate-900">Sales Details</h3>
+                <button onClick={() => setShowSalesModal(false)} className="text-sm text-slate-600">Close</button>
               </div>
 
               <div>
@@ -473,7 +483,7 @@ export default function OwnerDashboardPage() {
                   <select
                     value={salesFilterRecipe ?? ""}
                     onChange={(e) => setSalesFilterRecipe(e.target.value || null)}
-                    className="px-3 py-2 bg-white/5 rounded border border-white/10 text-white"
+                    className="px-3 py-2 bg-white border border-gray-200 rounded text-slate-700"
                   >
                     <option value="">-- Filter by recipe --</option>
                     {recipes.map((r) => (
@@ -484,7 +494,7 @@ export default function OwnerDashboardPage() {
                   <select
                     value={salesFilterMachine ?? ""}
                     onChange={(e) => setSalesFilterMachine(e.target.value || null)}
-                    className="px-3 py-2 bg-white/5 rounded border border-white/10 text-white"
+                    className="px-3 py-2 bg-white border border-gray-200 rounded text-slate-700"
                   >
                     <option value="">-- Filter by machine --</option>
                     {machines.map((m) => (
@@ -496,7 +506,7 @@ export default function OwnerDashboardPage() {
                     placeholder="Customer name contains..."
                     value={salesFilterCustomer ?? ""}
                     onChange={(e) => setSalesFilterCustomer(e.target.value || null)}
-                    className="px-3 py-2 bg-white/5 rounded border border-white/10 text-white"
+                    className="px-3 py-2 bg-white border border-gray-200 rounded text-slate-700"
                   />
                 </div>
 
@@ -516,13 +526,13 @@ export default function OwnerDashboardPage() {
                       return true;
                     })
                     .map((d: any, idx) => (
-                      <div key={d.id ?? idx} className="p-3 bg-white/5 rounded border border-white/6 flex justify-between items-center">
+                      <div key={d.id ?? idx} className="p-3 bg-white/60 rounded border border-gray-100 flex justify-between items-center">
                         <div>
-                          <div className="text-sm text-gray-300">{new Date(d.timestamp).toLocaleString()}</div>
-                          <div className="text-sm text-gray-200">{d.recipe ? `Recipe: ${d.recipe}` : "Recipe: -"} {d.customer ? ` • Customer: ${d.customer}` : ''}</div>
-                          {d.machine && <div className="text-xs text-gray-400">Machine: {typeof d.machine === 'string' ? d.machine : (d.machine && d.machine.machine_id ? d.machine.machine_id : d.machine)}</div>}
+                          <div className="text-sm text-slate-600">{new Date(d.timestamp).toLocaleString()}</div>
+                          <div className="text-sm text-slate-700">{d.recipe ? `Recipe: ${d.recipe}` : "Recipe: -"} {d.customer ? ` • Customer: ${d.customer}` : ''}</div>
+                          {d.machine && <div className="text-xs text-slate-500">Machine: {typeof d.machine === 'string' ? d.machine : (d.machine && d.machine.machine_id ? d.machine.machine_id : d.machine)}</div>}
                         </div>
-                        <div className="text-emerald-300 font-semibold">+₹{d.amount}</div>
+                        <div className="text-indigo-600 font-semibold">+₹{d.amount}</div>
                       </div>
                     ))}
                 </div>
@@ -670,8 +680,8 @@ function RecipeModal({ recipe, ingredientsList, onClose, onSave }: RecipeModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-lg w-[min(900px,95%)] max-h-[90vh] overflow-auto">
         <div className="p-6">
-          <h3 className="text-2xl font-bold text-white mb-1">{isNew ? "Add Recipe" : "Edit Recipe"}</h3>
-          <p className="text-gray-400 text-sm mb-6">Configure your drink recipe and ingredients</p>
+          <h3 className="text-2xl font-bold text-slate-900 mb-1">{isNew ? "Add Recipe" : "Edit Recipe"}</h3>
+          <p className="text-slate-600 text-sm mb-6">Configure your drink recipe and ingredients</p>
 
           {errors.length > 0 && (
             <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded text-red-300 text-sm">
@@ -681,42 +691,42 @@ function RecipeModal({ recipe, ingredientsList, onClose, onSave }: RecipeModalPr
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="text-sm text-gray-300 font-medium">Recipe Name *</label>
+              <label className="text-sm text-slate-700 font-medium">Recipe Name *</label>
               <input
                 value={name}
                 onChange={(e) => { setName(e.target.value); setErrors([]); }}
-                className="mt-2 w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="mt-2 w-full p-3 bg-white border border-gray-200 rounded-lg text-slate-700 placeholder-gray-400 focus:border-indigo-500 focus:outline-none"
                 placeholder="e.g., Mojito"
               />
             </div>
             <div>
-              <label className="text-sm text-gray-300 font-medium">Price (₹) *</label>
+              <label className="text-sm text-slate-700 font-medium">Price (₹) *</label>
               <input
                 type="number"
                 value={price}
                 onChange={(e) => { setPrice(Number(e.target.value)); setErrors([]); }}
-                className="mt-2 w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="mt-2 w-full p-3 bg-white border border-gray-200 rounded-lg text-slate-700 placeholder-gray-400 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm text-gray-300 font-medium">Video URL</label>
+              <label className="text-sm text-slate-700 font-medium">Video URL</label>
               <input
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                className="mt-2 w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="mt-2 w-full p-3 bg-white border border-gray-200 rounded-lg text-slate-700 placeholder-gray-400 focus:border-indigo-500 focus:outline-none"
                 placeholder="https://example.com/video.mp4"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-sm text-gray-300 font-medium mb-3 block">Recipe Ingredients</label>
-              <div className="space-y-3 bg-white/5 p-3 rounded">
+              <label className="text-sm text-slate-700 font-medium mb-3 block">Recipe Ingredients</label>
+              <div className="space-y-3 bg-white/50 p-3 rounded">
                 {rows.map((rrow, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-6">
-                      <label className="text-xs text-gray-400">Ingredient</label>
+                      <label className="text-xs text-slate-600">Ingredient</label>
                       <select
-                        className="mt-1 w-full p-2 bg-white/10 border border-white/20 rounded text-white"
+                        className="mt-1 w-full p-2 bg-white border border-gray-200 rounded text-slate-700"
                         value={rrow.ingredientId ?? ""}
                         onChange={(e) => {
                           const v = e.target.value;
@@ -732,8 +742,8 @@ function RecipeModal({ recipe, ingredientsList, onClose, onSave }: RecipeModalPr
                       </select>
                     </div>
                     <div className="col-span-3">
-                      <label className="text-xs text-gray-400">Amount (ml)</label>
-                      <input type="number" className="mt-1 w-full p-2 bg-white/10 border border-white/20 rounded text-white" value={rrow.amount_ml}
+                      <label className="text-xs text-slate-600">Amount (ml)</label>
+                      <input type="number" className="mt-1 w-full p-2 bg-white border border-gray-200 rounded text-slate-700" value={rrow.amount_ml}
                         onChange={(e) => setRow(idx, { amount_ml: Number(e.target.value) })} />
                     </div>
                     <div className="col-span-3 flex items-end gap-2 justify-end">
@@ -753,7 +763,7 @@ function RecipeModal({ recipe, ingredientsList, onClose, onSave }: RecipeModalPr
           <div className="flex gap-3 justify-end">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all"
+              className="px-6 py-2 bg-white border border-gray-200 text-slate-700 rounded-lg font-medium transition-all"
             >
               Cancel
             </button>
@@ -830,7 +840,7 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
     }
 
     return (
-      <div className="relative">
+        <div className="relative">
         <input
           value={query}
           onFocus={() => setOpen(true)}
@@ -842,17 +852,17 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
             else if (e.key === "Enter") { if (filtered[highlight]) select(filtered[highlight].name); }
           }}
           placeholder={placeholder}
-          className="mt-1 w-full p-2 bg-white/10 border border-white/20 rounded text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+          className="mt-1 w-full p-2 bg-white border border-gray-200 rounded text-slate-700 placeholder-gray-400 focus:border-indigo-500 focus:outline-none"
         />
 
         {open && filtered.length > 0 && (
-          <ul className="absolute z-50 mt-1 max-h-40 w-full overflow-auto bg-white/5 border border-white/10 rounded shadow-lg">
+          <ul className="absolute z-50 mt-1 max-h-40 w-full overflow-auto bg-white rounded border border-gray-200 rounded shadow-lg">
             {filtered.map((s, i) => (
               <li
                 key={s.id}
                 onMouseDown={(ev) => { ev.preventDefault(); select(s.name); }}
                 onMouseEnter={() => setHighlight(i)}
-                className={`px-3 py-2 cursor-pointer ${i === highlight ? "bg-white/10" : ""}`}
+                className={`px-3 py-2 cursor-pointer ${i === highlight ? "bg-gray-100" : ""}`}
               >
                 {s.name}
               </li>
@@ -865,10 +875,10 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-lg w-[min(900px,95%)] max-h-[90vh] overflow-auto">
+        <div className="bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg w-[min(900px,95%)] max-h-[90vh] overflow-auto">
         <div className="p-6">
-          <h3 className="text-2xl font-bold text-white mb-1">Edit Bottle Slots</h3>
-          <p className="text-gray-400 text-sm mb-6">Assign liquids to each bottle position</p>
+          <h3 className="text-2xl font-bold text-slate-900 mb-1">Edit Bottle Slots</h3>
+          <p className="text-slate-600 text-sm mb-6">Assign liquids to each bottle position</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Cold slots (B1-B6) */}
@@ -876,7 +886,7 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
               <h4 className="text-sm text-gray-300 font-semibold mb-3">Cold Slots (B1 - B6)</h4>
               <div className="grid grid-cols-2 gap-3">
                 {local.slice(0, 6).map((b, idx) => (
-                  <div key={b.bottle_number} className="p-3 bg-white/5 border border-white/10 rounded-lg">
+                  <div key={b.bottle_number} className="p-3 bg-white/60 border border-gray-100 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-gray-400 font-medium">B{b.bottle_number}</label>
                       <span className="text-xs text-indigo-300">Cold</span>
@@ -897,7 +907,7 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
               <h4 className="text-sm text-gray-300 font-semibold mb-3">Normal Slots (B7 - B12)</h4>
               <div className="grid grid-cols-2 gap-3">
                 {local.slice(6, 12).map((b, idx) => (
-                  <div key={b.bottle_number} className="p-3 bg-white/5 border border-white/10 rounded-lg">
+                  <div key={b.bottle_number} className="p-3 bg-white/60 border border-gray-100 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-gray-400 font-medium">B{b.bottle_number}</label>
                       <span className="text-xs text-amber-300">Normal</span>
@@ -919,7 +929,7 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all"
+              className="px-6 py-2 bg-white border border-gray-200 text-slate-700 rounded-lg font-medium transition-all"
             >
               Cancel
             </button>

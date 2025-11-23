@@ -33,6 +33,39 @@ class DailyCountViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DailyCountSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_queryset(self):
+        """Support optional `range` query param.
+
+        - ?range=today  => returns only records whose timestamp date equals today
+        If no range provided, return full queryset ordered by -timestamp.
+        """
+        qs = DailyCount.objects.all().order_by("-timestamp")
+        req = getattr(self, 'request', None)
+        if not req:
+            return qs
+
+        rng = req.query_params.get('range')
+        if not rng:
+            return qs
+
+        # explicit date param takes precedence: ?date=YYYY-MM-DD
+        date_str = req.query_params.get('date')
+        if date_str:
+            from django.utils.dateparse import parse_date
+
+            parsed = parse_date(date_str)
+            if parsed:
+                return qs.filter(timestamp__date=parsed).order_by("-timestamp")
+
+        if rng == 'today':
+            from django.utils import timezone
+
+            today = timezone.localdate()
+            return qs.filter(timestamp__date=today).order_by("-timestamp")
+
+        # Unknown range value -> return unfiltered queryset
+        return qs
+
 
 class BottleSlotViewSet(viewsets.ModelViewSet):
     queryset = BottleSlot.objects.all().order_by("machine", "bottle_number")
