@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import IdleTimer from "../components/IdleTimer";
 import { getSelectedRecipe, logout, SessionRecipe } from "../components/session";
+
 export default function ConfirmPage() {
   const router = useRouter();
   const [recipe, setRecipe] = React.useState<SessionRecipe | null>(null);
@@ -17,33 +18,33 @@ export default function ConfirmPage() {
   if (!recipe) return null;
 
   return (
-    <div className="min-h-screen w-full bg-white text-slate-900 flex flex-col">
+    <div className="full-page-overlay fixed inset-0 z-[9999] h-screen w-screen bg-[#0F172A] text-[#F8FAFC] overflow-y-auto overflow-x-hidden">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-gray-200 px-6 py-4">
+      <div className="sticky top-0 z-30 bg-[#1E293B]/95 backdrop-blur-md border-b border-[#7C3AED]/20 px-6 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Confirm Your Selection</h1>
-            <p className="text-slate-600 text-sm mt-1">Review before proceeding</p>
+            <h1 className="text-xl font-bold text-[#F8FAFC]">Confirm Your Selection</h1>
+            <p className="text-[#94A3B8] text-xs">Review before proceeding</p>
           </div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-[#94A3B8]">
             <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-2xl bg-white/60 backdrop-blur-lg rounded-3xl border border-gray-200 p-8 shadow-sm animate-fadeIn">
+      {/* Main Content - scrollable */}
+      <main className="px-4 py-6">
+        <div className="w-full max-w-lg mx-auto bg-[#1E293B] rounded-2xl border border-[#7C3AED]/20 p-6 shadow-lg">
           {/* Recipe Card */}
           <div className="text-center">
-            <div className="inline-block px-4 py-1 bg-indigo-100 rounded-full text-indigo-700 text-xs font-semibold uppercase tracking-wide mb-6">
+            <div className="inline-block px-3 py-1 bg-[#7C3AED]/20 rounded-full text-[#7C3AED] text-xs font-semibold uppercase tracking-wide mb-4">
               Ready to Order
             </div>
 
-            <h2 className="text-5xl font-bold text-slate-900 mb-4">{recipe.recipe_name}</h2>
+            <h2 className="text-2xl font-bold text-[#F8FAFC] mb-3">{recipe.recipe_name}</h2>
 
-            {/* Media Preview */}
-            <div className="relative w-full h-72 rounded-2xl overflow-hidden mb-8 shadow-md border border-gray-100">
+            {/* Media Preview - reduced height */}
+            <div className="relative w-full h-40 rounded-xl overflow-hidden mb-4 shadow-md border border-[#7C3AED]/20">
               {recipe.image_url ? (
                 <img src={recipe.image_url as string} alt={recipe.recipe_name} className="w-full h-full object-cover" />
               ) : /\.(png|jpe?g|webp|svg|gif)(\?|$)/i.test(recipe.video_url || "") ? (
@@ -53,27 +54,25 @@ export default function ConfirmPage() {
                   <source src={recipe.video_url} />
                 </video>
               )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent opacity-40" />
             </div>
 
             {/* Price Display */}
-            <div className="mb-8">
-              <p className="text-slate-500 text-sm uppercase tracking-wide mb-2">Total Amount</p>
-              <p className="text-6xl font-bold text-indigo-600">₹{recipe.price}</p>
+            <div className="mb-6">
+              <p className="text-[#94A3B8] text-xs uppercase tracking-wide mb-1">Total Amount</p>
+              <p className="text-4xl font-bold text-[#FACC15]">₹{recipe.price}</p>
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => router.push("/payment")}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/50 transition-all transform hover:scale-105"
+                className="w-full sm:flex-1 px-6 py-3 bg-[#7C3AED] hover:bg-[#8B5CF6] text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-105"
               >
                 Proceed to Payment
               </button>
               <button
                 onClick={() => router.push("/products")}
-                className="flex-1 px-6 py-4 bg-white text-slate-800 font-semibold rounded-xl border border-gray-200 transition-all hover:shadow-sm"
+                className="w-full sm:flex-1 px-6 py-3 bg-[#0F172A] text-[#F8FAFC] font-semibold rounded-xl border border-[#7C3AED]/30 transition-all hover:bg-[#7C3AED]/10"
               >
                 Back to Menu
               </button>

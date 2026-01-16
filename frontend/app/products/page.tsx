@@ -127,43 +127,46 @@ export default function ProductsPage() {
   const cols = Math.min(3, Math.max(1, recipes.length || 1));
 
   return (
-    <div className="fixed inset-0 h-screen w-screen bg-white text-slate-900 overflow-auto">
+    <div
+      className="full-page-overlay fixed inset-0 z-[9999] h-screen w-screen bg-[#0F172A] text-[#F8FAFC] overflow-auto"
+      style={{ isolation: 'isolate', top: 0, left: 0, right: 0, bottom: 0 }}
+    >
       {/* Header - overlayed, minimal and transparent */}
-      <header className="absolute top-0 left-0 right-0 h-20 z-40 flex items-center justify-between px-8 backdrop-blur-md bg-white/60 border-b border-gray-200">
+      <header className="absolute top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-6 backdrop-blur-md bg-[#1E293B]/90 border-b border-[#7C3AED]/20">
         <div className="flex flex-col">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Select Your Drink</h1>
-          <p className="text-sm text-slate-600 mt-1">Handcrafted. Premium. MIXION.</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#F8FAFC] tracking-tight leading-tight">Select Your Drink</h1>
+          <p className="text-xs text-[#94A3B8]">Handcrafted. Premium. MIXION.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-xs text-white/40">
+          <div className="text-xs text-[#94A3B8]">
             <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
           </div>
           <button
             onClick={fetchRecipes}
-            className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-xl text-sm font-medium transition-all border border-gray-200 shadow-sm"
+            className="px-3 py-2 bg-[#1E293B] hover:bg-[#7C3AED]/20 text-[#F8FAFC] rounded-xl text-sm font-medium transition-all border border-[#7C3AED]/30 shadow-sm"
           >
-            {isRefreshing ? <span className="animate-spin h-3 w-3 border-2 border-slate-300 border-t-slate-700 rounded-full" /> : "Refresh"}
+            {isRefreshing ? <span className="animate-spin h-3 w-3 border-2 border-[#7C3AED]/30 border-t-[#7C3AED] rounded-full" /> : "Refresh"}
           </button>
           <button
             onClick={() => router.push('/owner-login')}
-            className="px-3 py-2 bg-transparent hover:bg-white/6 text-white rounded-xl text-sm font-medium transition-all border border-white/6"
+            className="px-3 py-2 bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 text-[#7C3AED] rounded-xl text-sm font-medium transition-all border border-[#7C3AED]/30"
           >
             Owner Login
           </button>
         </div>
       </header>
 
-      <main className="w-full h-full p-0 pt-20">
+      <main className="w-full h-full p-0 pt-16">
         {/* compute columns dynamically: max 3 columns on large screens, but adapt when there are fewer recipes */}
         {loading && (
           <div className="w-full h-full p-6 box-border">
             <div style={{ display: "grid", gap: "1.25rem", gridTemplateColumns: `repeat(${Math.min(3, 3)}, minmax(0, 1fr))` }}>
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="rounded-3xl overflow-hidden animate-pulse bg-slate-50 border border-gray-200 shadow-sm h-96">
-                  <div className="w-full h-2/3 bg-slate-100" />
+                <div key={i} className="rounded-3xl overflow-hidden animate-pulse bg-[#1E293B] border border-[#7C3AED]/20 shadow-sm h-96">
+                  <div className="w-full h-2/3 bg-[#0F172A]" />
                   <div className="p-6 space-y-4">
-                    <div className="h-5 bg-slate-100 rounded w-2/3" />
-                    <div className="h-4 bg-slate-100 rounded w-1/2" />
+                    <div className="h-5 bg-[#0F172A] rounded w-2/3" />
+                    <div className="h-4 bg-[#0F172A] rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -173,7 +176,7 @@ export default function ProductsPage() {
 
         {!loading && recipes.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">No drinks available</p>
+            <p className="text-[#94A3B8] text-lg">No drinks available</p>
           </div>
         )}
 
@@ -191,10 +194,10 @@ export default function ProductsPage() {
                 <article
                   key={r.recipe_name}
                   onClick={() => handleSelect(r)}
-                  className="group cursor-pointer rounded-3xl overflow-hidden border border-gray-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                  className="group cursor-pointer rounded-3xl overflow-hidden border border-[#7C3AED]/20 bg-[#1E293B] shadow-lg transition-transform duration-300 hover:-translate-y-1"
                 >
                   {/* Media */}
-                  <div className="relative w-full h-60 md:h-64 lg:h-72 overflow-hidden bg-slate-50">
+                  <div className="relative w-full h-40 md:h-48 lg:h-52 overflow-hidden bg-[#0F172A]">
                     {((r as any).image_url) ? (
                       <img
                         src={(r as any).image_url}
@@ -223,10 +226,10 @@ export default function ProductsPage() {
                   </div>
 
                   {/* Body */}
-                  <div className="p-6 flex flex-col justify-between">
+                  <div className="p-4 flex flex-col justify-between">
                     <div>
-                      <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{r.recipe_name}</h3>
-                      <p className="text-xs text-slate-500 mt-3">
+                      <h3 className="text-lg md:text-xl font-bold text-[#F8FAFC] tracking-tight">{r.recipe_name}</h3>
+                      <p className="text-xs text-[#94A3B8] mt-3">
                         {((r as any).ingredients || [])
                           .slice(0, 3)
                           .map((it: any) => (it.ingredient ? it.ingredient.name + ` ${it.amount_ml}ml` : it.amount_ml ? `${it.amount_ml}ml` : ""))
@@ -237,8 +240,8 @@ export default function ProductsPage() {
 
                     <div className="mt-4 flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-slate-500 uppercase tracking-wider">Price</p>
-                        <p className="text-4xl font-extrabold text-indigo-700 mt-1">₹{r.price}</p>
+                        <p className="text-xs text-[#94A3B8] uppercase tracking-wider">Price</p>
+                        <p className="text-2xl font-bold text-[#FACC15]">₹{r.price}</p>
                       </div>
 
                       <button
@@ -246,7 +249,7 @@ export default function ProductsPage() {
                           e.stopPropagation();
                           handleSelect(r);
                         }}
-                        className="relative px-8 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-indigo-500 to-pink-500 shadow-[0_18px_40px_rgba(99,102,241,0.14)] transition-all transform hover:scale-105"
+                        className="relative px-5 py-2 rounded-full text-white text-sm font-medium bg-[#7C3AED] hover:bg-[#8B5CF6] shadow-md transition-all transform hover:scale-105"
                         aria-label={`Select ${r.recipe_name}`}
                       >
                         <span className="absolute inset-0 rounded-full opacity-20 blur-xl mix-blend-screen" />

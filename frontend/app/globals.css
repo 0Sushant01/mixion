@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  --card-bg: #1E293B;
+  --primary: #7C3AED;
+  --secondary: #FACC15;
+  --text-primary: #F8FAFC;
+  --text-muted: #94A3B8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0F172A;
+    --foreground: #F8FAFC;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), 'Poppins', system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Hide layout wrapper when a full-page overlay (like products page) is present */
+body:has(.full-page-overlay)>div>header,
+body:has(.full-page-overlay)>div>footer,
+body:has(.full-page-overlay)>div>main {
+  display: none !important;
+}
+
+/* Hide the entire layout container that creates stacking contexts */
+body:has(.full-page-overlay)>div.min-h-screen {
+  display: none !important;
+}
+
+/* Ensure full-page-overlay takes the entire viewport */
+.full-page-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }

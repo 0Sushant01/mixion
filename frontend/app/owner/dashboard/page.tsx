@@ -555,13 +555,12 @@ export default function OwnerDashboardPage() {
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-right">
           <div
-            className={`rounded-lg px-4 py-3 flex items-center gap-3 backdrop-blur-md border ${
-              toast?.type === "success"
+            className={`rounded-lg px-4 py-3 flex items-center gap-3 backdrop-blur-md border ${toast?.type === "success"
                 ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                 : toast?.type === "error"
-                ? "bg-red-500/20 border-red-500/30 text-red-300"
-                : "bg-blue-500/20 border-blue-500/30 text-blue-300"
-            }`}
+                  ? "bg-red-500/20 border-red-500/30 text-red-300"
+                  : "bg-blue-500/20 border-blue-500/30 text-blue-300"
+              }`}
           >
             <span>
               {toast?.type === "success" ? "✓" : toast?.type === "error" ? "✕" : "ℹ"}
@@ -840,7 +839,7 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
     }
 
     return (
-        <div className="relative">
+      <div className="relative">
         <input
           value={query}
           onFocus={() => setOpen(true)}
@@ -875,12 +874,12 @@ function BottleEditor({ bottles, ingredientsList, onClose, onSave }: BottleEdito
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg w-[min(900px,95%)] max-h-[90vh] overflow-auto">
+      <div className="bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg w-[min(900px,95%)] max-h-[90vh] overflow-auto">
         <div className="p-6">
           <h3 className="text-2xl font-bold text-slate-900 mb-1">Edit Bottle Slots</h3>
           <p className="text-slate-600 text-sm mb-6">Assign liquids to each bottle position</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Cold slots (B1-B6) */}
             <div>
               <h4 className="text-sm text-gray-300 font-semibold mb-3">Cold Slots (B1 - B6)</h4>

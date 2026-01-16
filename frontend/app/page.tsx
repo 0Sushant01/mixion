@@ -23,10 +23,10 @@ export default function Home() {
   return (
     <div
       onClick={handleAnyClick}
-      className="relative h-[70vh] w-full cursor-pointer select-none overflow-hidden rounded-none bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#0e7490] text-white sm:h-[80vh] sm:rounded-3xl lg:h-[85vh] shadow-2xl animate-in fade-in"
+      className="relative h-[70vh] w-full cursor-pointer select-none overflow-hidden rounded-none bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#7C3AED] text-white sm:h-[80vh] sm:rounded-3xl lg:h-[85vh] shadow-2xl animate-in fade-in"
     >
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="animate-gradient absolute inset-0 bg-gradient-to-tr from-cyan-400 via-emerald-400 to-blue-400 opacity-60" />
+        <div className="animate-gradient absolute inset-0 bg-gradient-to-tr from-[#7C3AED] via-[#FACC15] to-[#7C3AED] opacity-40" />
         <svg
           className="absolute inset-0 w-full h-full"
           viewBox="0 0 800 600"
@@ -58,10 +58,10 @@ export default function Home() {
         </video>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
-          <h1 className="text-6xl font-extrabold tracking-tight text-transparent bg-gradient-to-r from-cyan-300 via-emerald-400 to-blue-400 bg-clip-text drop-shadow-2xl sm:text-7xl animate-in fade-in slide-in">
+          <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-2xl sm:text-5xl animate-in fade-in slide-in">
             MIXION
           </h1>
-          <p className="mt-6 text-xl text-cyan-100/90 sm:text-2xl font-medium animate-in fade-in slide-in">Touch anywhere to begin</p>
+          <p className="mt-4 text-base text-white/90 sm:text-lg font-medium animate-in fade-in slide-in">Touch anywhere to begin</p>
         </div>
       </div>
 

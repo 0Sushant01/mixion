@@ -24,7 +24,8 @@ export default function IdleTimer({ timeoutSeconds = 15, onTimeout }: Props) {
         setRemaining((r) => {
           if (r <= 1) {
             if (timerRef.current) window.clearInterval(timerRef.current);
-            callbackRef.current();
+            // Call callback asynchronously to avoid React state update during render
+            setTimeout(() => callbackRef.current(), 0);
             return 0;
           }
           return r - 1;

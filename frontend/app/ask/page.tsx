@@ -9,48 +9,48 @@ export default function AskPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen w-full bg-white text-slate-900 flex flex-col">
+    <div className="full-page-overlay fixed inset-0 z-[9999] h-screen w-screen bg-[#0F172A] text-[#F8FAFC] overflow-y-auto overflow-x-hidden">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-gray-200 px-6 py-4">
+      <div className="sticky top-0 z-30 bg-[#1E293B]/95 backdrop-blur-md border-b border-[#7C3AED]/20 px-6 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Enjoy Your Drink!</h1>
-            <p className="text-slate-600 text-sm mt-1">Thank you for your order</p>
+            <h1 className="text-xl font-bold text-[#F8FAFC]">Enjoy Your Drink!</h1>
+            <p className="text-[#94A3B8] text-xs">Thank you for your order</p>
           </div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-[#94A3B8]">
             <IdleTimer onTimeout={() => logout((p) => router.push(p))} timeoutSeconds={15} />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-2xl bg-white/60 backdrop-blur-lg rounded-3xl border border-gray-200 p-8 shadow-sm text-center animate-fadeIn">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-lg bg-[#1E293B] backdrop-blur-lg rounded-2xl border border-[#7C3AED]/20 p-8 shadow-lg text-center animate-fadeIn">
           {/* Celebration Icon */}
           <div className="text-6xl mb-6">🍹</div>
 
           {/* Main Question */}
-          <h2 className="text-4xl font-bold text-slate-900 mb-2">Another one?</h2>
-          <p className="text-slate-600 mb-8 text-lg">Would you like to order another drink?</p>
+          <h2 className="text-3xl font-bold text-[#F8FAFC] mb-2">Another one?</h2>
+          <p className="text-[#94A3B8] mb-8 text-base">Would you like to order another drink?</p>
 
           {/* Buttons */}
           <div className="flex gap-4 justify-center flex-col sm:flex-row">
             <button
               onClick={() => router.push("/products")}
-              className="flex-1 px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:scale-105 text-lg"
+              className="flex-1 px-8 py-4 bg-[#7C3AED] hover:bg-[#8B5CF6] text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-105 text-lg"
             >
               Yes, Another One! 🎉
             </button>
             <button
               onClick={() => logout((p) => router.push(p))}
-              className="flex-1 px-8 py-4 bg-white text-slate-800 font-semibold rounded-xl border border-gray-200 transition-all hover:shadow-sm text-lg"
+              className="flex-1 px-8 py-4 bg-[#0F172A] text-[#F8FAFC] font-semibold rounded-xl border border-[#7C3AED]/30 transition-all hover:bg-[#7C3AED]/10 text-lg"
             >
               No, Exit
             </button>
           </div>
 
           {/* Footer Message */}
-          <p className="text-slate-500 text-sm mt-8">Auto logout in 15 seconds</p>
+          <p className="text-[#94A3B8] text-xs mt-8">Auto logout in 15 seconds</p>
         </div>
       </main>
 
