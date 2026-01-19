@@ -82,6 +82,9 @@ const BottlePage = () => {
 
     return (
         <div className="bottle-page">
+            <button className="back-button" onClick={() => navigate('/')}>
+                &larr; Back
+            </button>
             <h1>Select Your Mix</h1>
 
             {loading ? <p>Loading...</p> : (
