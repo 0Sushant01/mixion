@@ -1,0 +1,6 @@
+{
+    "use_real_mqtt": true,
+    "mqtt_broker": "localhost",
+    "mqtt_port": 1883,
+    "mqtt_topic": "mixion/dispense"
+}
