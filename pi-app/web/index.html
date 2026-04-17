@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixion Kiosk</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════════════
+         SPLASH SCREEN
+    ══════════════════════════════════════════════  -->
+    <div id="splash-screen" class="screen active">
+        <div class="overlay"></div>
+        <video src="/static/images/promo.mp4" class="bg-media" autoplay loop playsinline></video>
+        <div class="splash-content">
+            <div class="splash-logo">MIXION</div>
+            <p class="splash-sub">TOUCH ANYWHERE TO ORDER</p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         MENU SCREEN  (sidebar + grid)
+    ══════════════════════════════════════════════  -->
+    <div id="menu-screen" class="screen">
+        <div class="menu-layout">
+
+            <!-- LEFT SIDEBAR -->
+            <aside class="sidebar">
+                <div class="sidebar-brand">🍹 Mixion</div>
+
+                <nav class="sidebar-nav">
+                    <p class="nav-section-label">CATEGORY</p>
+                    <div class="nav-item active" onclick="filterDrinks('all', this)">All Drinks</div>
+                    <div class="nav-item" onclick="filterDrinks('popular', this)">Popular</div>
+                    <div class="nav-item" onclick="filterDrinks('new', this)">New Arrivals</div>
+                </nav>
+
+                <div class="sidebar-divider"></div>
+
+                <nav class="sidebar-nav">
+                    <p class="nav-section-label">INGREDIENTS</p>
+                    <div class="nav-item" onclick="filterDrinks('cola', this)">🥤 Cola</div>
+                    <div class="nav-item" onclick="filterDrinks('lime', this)">🍋 Lime Juice</div>
+                    <div class="nav-item" onclick="filterDrinks('soda', this)">💧 Soda Water</div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="sidebar-btn" onclick="showScreen('customize-screen')">⚗️ Customize</button>
+                    <button class="sidebar-btn sidebar-btn-muted" onclick="goAdmin()">🔑 Admin</button>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="menu-main">
+                <div class="menu-topbar">
+                    <div>
+                        <h1 class="menu-title">Drink Menu</h1>
+                        <p class="menu-sub" id="menu-count">Loading drinks...</p>
+                    </div>
+                </div>
+                <div class="drink-grid" id="menu"></div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         CUSTOMIZE SCREEN
+    ══════════════════════════════════════════════  -->
+    <div id="customize-screen" class="screen">
+        <div class="simple-layout">
+            <div class="simple-topbar">
+                <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
+                <h2>Customize Drink</h2>
+            </div>
+            <div class="customize-body">
+                <div class="ingredient-row">
+                    <span class="ing-label">Cola Base</span>
+                    <input type="range" min="0" max="150" value="80" class="slider" oninput="updateVal(this)">
+                    <span class="ing-val">80ml</span>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ing-label">Lime Juice</span>
+                    <input type="range" min="0" max="60" value="20" class="slider" oninput="updateVal(this)">
+                    <span class="ing-val">20ml</span>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ing-label">Soda Water</span>
+                    <input type="range" min="0" max="100" value="40" class="slider" oninput="updateVal(this)">
+                    <span class="ing-val">40ml</span>
+                </div>
+                <button class="mix-btn" onclick="orderDrink(0)">Start Mixing →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         PROCESSING SCREEN
+    ══════════════════════════════════════════════  -->
+    <div id="processing-screen" class="screen">
+        <div class="processing-center">
+            <div class="pour-animation">
+                <div class="pour-drop"></div>
+                <div class="glass-fill"></div>
+            </div>
+            <h2 class="proc-title">Preparing Your Drink</h2>
+            <p class="proc-sub">Please wait while we mix your order...</p>
+            <div class="proc-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js?v=5"></script>
+</body>
+</html>

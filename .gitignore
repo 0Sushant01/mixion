@@ -1,0 +1,62 @@
+# ============================
+# Python & Virtual Environments
+# ============================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# ============================
+# Node.js & Web
+# ============================
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+.next/
+out/
+build/
+
+# ============================
+# Environment Variables & Secrets
+# ============================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+client_secret.json
+
+# ============================
+# Database Files
+# ============================
+*.db
+*.sqlite3
+*.db-wal
+*.db-shm
+pi-app/data/mixion.db*
+
+# ============================
+# Local Configuration
+# ============================
+config.json
+
+
+# ============================
+# OS Generated Files
+# ============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

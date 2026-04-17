@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mixion Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+
+        body {
+            background: #f5f7fa;
+            color: #111827;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-wrap {
+            display: flex;
+            width: 900px;
+            height: 520px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.10);
+            border: 1px solid #e4e7ef;
+            overflow: hidden;
+        }
+
+        /* Left decorative panel */
+        .login-side {
+            width: 340px;
+            background: linear-gradient(145deg, #4f6ef7, #7c3aed);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 40px;
+            flex-shrink: 0;
+        }
+        .login-side .logo { font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: 6px; }
+        .login-side p { color: rgba(255,255,255,0.7); font-size: 0.95rem; text-align: center; line-height: 1.6; }
+
+        /* Right form panel */
+        .login-form-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px 48px;
+        }
+
+        h2 { font-size: 1.6rem; font-weight: 700; color: #111827; margin-bottom: 6px; }
+        .form-sub { color: #6b7280; font-size: 0.9rem; margin-bottom: 32px; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 7px;
+            letter-spacing: 0.3px;
+        }
+        .form-group input {
+            width: 100%;
+            background: #f5f7fa;
+            border: 1px solid #e4e7ef;
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #111827;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #4f6ef7;
+            box-shadow: 0 0 0 3px rgba(79,110,247,0.12);
+            background: #fff;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: #4f6ef7;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 14px rgba(79,110,247,0.3);
+        }
+        .btn-login:hover  { background: #3a55d4; }
+        .btn-login:active { transform: scale(0.98); }
+
+        .error-msg {
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 14px;
+            font-size: 0.88rem;
+            display: none;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 22px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.88rem;
+            text-align: center;
+        }
+        .back-link:hover { color: #4f6ef7; }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="login-side">
+            <div class="logo">MIXION</div>
+            <p>Drink Dispensing System<br>Admin Control Panel</p>
+        </div>
+        <div class="login-form-panel">
+            <h2>Welcome back</h2>
+            <p class="form-sub">Sign in to access the admin dashboard</p>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+
+            <button class="btn-login" onclick="doLogin()">Sign In →</button>
+            <div class="error-msg" id="error-msg">Invalid username or password. Please try again.</div>
+            <a class="back-link" href="/">← Return to Kiosk</a>
+        </div>
+    </div>
+
+    <script>
+        async function doLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('error-msg');
+            errEl.style.display = 'none';
+            if (!username || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return; }
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('admin_token', data.token);
+                    window.location.href = '/admin';
+                } else {
+                    errEl.textContent = 'Invalid username or password.';
+                    errEl.style.display = 'block';
+                }
+            } catch(e) {
+                errEl.textContent = 'Server error. Is the server running?';
+                errEl.style.display = 'block';
+            }
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    </script>
+</body>
+</html>
