@@ -48,16 +48,17 @@ function getPageSize() {
     const h = window.innerHeight;
     
     const availableH = h - 140;
-    let rows = Math.floor(availableH / 210);
+    // Increased row height estimation for larger cards
+    let rows = Math.floor(availableH / 250);
     if (rows < 1) rows = 1;
 
     let cols = 1;
     if (w > 1280) {
-        cols = Math.floor((w - 300) / 300);
+        cols = Math.floor((w - 300) / 420);
     } else if (w > 900) {
-        cols = Math.floor((w - 260) / 280);
+        cols = Math.floor((w - 260) / 360);
     } else if (w > 640) {
-        cols = Math.floor((w - 200) / 260);
+        cols = Math.floor((w - 200) / 280);
     }
     
     if (cols < 1) cols = 1;
@@ -177,6 +178,13 @@ function setupMediaObserver() {
     });
 }
 
+function scrollToPage(pageIndex) {
+    const pages = document.querySelectorAll('.drink-page');
+    if (pageIndex >= 0 && pageIndex < pages.length) {
+        pages[pageIndex].scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 function renderPageIndicator(total, current) {
     const indicator = document.getElementById('page-indicator');
     indicator.innerHTML = '';
@@ -184,6 +192,7 @@ function renderPageIndicator(total, current) {
     for (let i = 0; i < total; i += 1) {
         const dot = document.createElement('span');
         dot.className = `page-dot${i === current ? ' active' : ''}`;
+        dot.onclick = () => scrollToPage(i);
         indicator.appendChild(dot);
     }
 }
@@ -214,6 +223,24 @@ function attachSnapScrollListener() {
             updateCurrentSnapPage();
             scrollRafPending = false;
         });
+    }, { passive: true });
+
+    // Custom JS Swipe Detection for Kiosks where native touch scroll fails
+    let touchStartY = 0;
+    container.addEventListener('touchstart', (e) => {
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+        const touchEndY = e.changedTouches[0].screenY;
+        const swipeDistance = touchStartY - touchEndY;
+        const threshold = 60; // minimum pixels to count as swipe
+
+        if (swipeDistance > threshold) {
+            scrollToPage(currentSnapPage + 1);
+        } else if (swipeDistance < -threshold) {
+            scrollToPage(currentSnapPage - 1);
+        }
     }, { passive: true });
 
     container.dataset.listenerAttached = '1';
