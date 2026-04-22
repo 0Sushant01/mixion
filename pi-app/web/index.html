@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mixion Kiosk</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=10">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -14,7 +14,7 @@
     ══════════════════════════════════════════════  -->
     <div id="splash-screen" class="screen active">
         <div class="overlay"></div>
-        <video src="/static/images/promo.mp4" class="bg-media" autoplay loop playsinline></video>
+        <video src="/static/images/promo.mp4" class="bg-media" autoplay loop muted playsinline></video>
         <div class="splash-content">
             <div class="splash-logo">MIXION</div>
             <p class="splash-sub">TOUCH ANYWHERE TO ORDER</p>
@@ -22,78 +22,48 @@
     </div>
 
     <!-- ══════════════════════════════════════════════
-         MENU SCREEN  (sidebar + grid)
+         MENU SCREEN
     ══════════════════════════════════════════════  -->
     <div id="menu-screen" class="screen">
         <div class="menu-layout">
 
-            <!-- LEFT SIDEBAR -->
+            <!-- FIXED SIDEBAR -->
             <aside class="sidebar">
                 <div class="sidebar-brand">🍹 Mixion</div>
 
-                <nav class="sidebar-nav">
-                    <p class="nav-section-label">CATEGORY</p>
-                    <div class="nav-item active" onclick="filterDrinks('all', this)">All Drinks</div>
-                    <div class="nav-item" onclick="filterDrinks('popular', this)">Popular</div>
-                    <div class="nav-item" onclick="filterDrinks('new', this)">New Arrivals</div>
-                </nav>
+                <!-- Scrollable nav inside sidebar -->
+                <div class="sidebar-scroll">
+                    <p class="nav-section-label">Category</p>
+                    <nav id="sidebar-categories"></nav>
 
-                <div class="sidebar-divider"></div>
+                    <div class="sidebar-divider"></div>
 
-                <nav class="sidebar-nav">
-                    <p class="nav-section-label">INGREDIENTS</p>
-                    <div class="nav-item" onclick="filterDrinks('cola', this)">🥤 Cola</div>
-                    <div class="nav-item" onclick="filterDrinks('lime', this)">🍋 Lime Juice</div>
-                    <div class="nav-item" onclick="filterDrinks('soda', this)">💧 Soda Water</div>
-                </nav>
+                    <p class="nav-section-label">Groups</p>
+                    <nav id="sidebar-groups"></nav>
+                </div>
 
                 <div class="sidebar-footer">
-                    <button class="sidebar-btn" onclick="showScreen('customize-screen')">⚗️ Customize</button>
-                    <button class="sidebar-btn sidebar-btn-muted" onclick="goAdmin()">🔑 Admin</button>
+                    <button class="sidebar-btn" onclick="goAdmin()">🔑 Admin</button>
                 </div>
             </aside>
 
             <!-- MAIN CONTENT -->
             <main class="menu-main">
+                <!-- Fixed header -->
                 <div class="menu-topbar">
                     <div>
-                        <h1 class="menu-title">Drink Menu</h1>
+                        <h1 class="menu-title" id="menu-title-display">All Drinks</h1>
                         <p class="menu-sub" id="menu-count">Loading drinks...</p>
                     </div>
                 </div>
-                <div class="drink-grid" id="menu"></div>
+
+                <div id="menu-snap-container" class="menu-snap-container">
+                    <div id="menu-pages" class="menu-pages"></div>
+                </div>
+
+                <div id="page-indicator" class="page-indicator" aria-hidden="true"></div>
             </main>
 
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         CUSTOMIZE SCREEN
-    ══════════════════════════════════════════════  -->
-    <div id="customize-screen" class="screen">
-        <div class="simple-layout">
-            <div class="simple-topbar">
-                <button class="back-btn" onclick="showScreen('menu-screen')">← Back</button>
-                <h2>Customize Drink</h2>
-            </div>
-            <div class="customize-body">
-                <div class="ingredient-row">
-                    <span class="ing-label">Cola Base</span>
-                    <input type="range" min="0" max="150" value="80" class="slider" oninput="updateVal(this)">
-                    <span class="ing-val">80ml</span>
-                </div>
-                <div class="ingredient-row">
-                    <span class="ing-label">Lime Juice</span>
-                    <input type="range" min="0" max="60" value="20" class="slider" oninput="updateVal(this)">
-                    <span class="ing-val">20ml</span>
-                </div>
-                <div class="ingredient-row">
-                    <span class="ing-label">Soda Water</span>
-                    <input type="range" min="0" max="100" value="40" class="slider" oninput="updateVal(this)">
-                    <span class="ing-val">40ml</span>
-                </div>
-                <button class="mix-btn" onclick="orderDrink(0)">Start Mixing →</button>
-            </div>
         </div>
     </div>
 
@@ -114,6 +84,37 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=5"></script>
+    <!-- ══════════════════════════════════════════════
+         EXTRAS & PAYMENT MODAL
+    ══════════════════════════════════════════════  -->
+    <div id="payment-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: 12px; color: black; text-align: left; max-width: 400px; width: 90%;">
+            <h2 style="margin-top: 0; text-align: center;">Select Extras (Optional)</h2>
+            <div id="extras-container" style="margin: 1.5rem 0; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Extras checkboxes injected here -->
+            </div>
+            <hr style="border: none; border-top: 1px dashed #ccc; margin: 1rem 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.1rem;">
+                <span>Drink Price:</span>
+                <span id="modal-drink-price">₹0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.1rem; color: #666;">
+                <span>Extras Total:</span>
+                <span id="modal-extras-total">₹0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; margin-top: 0.5rem;">
+                <span>TOTAL:</span>
+                <span id="modal-total-price">₹0</span>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <button onclick="cancelPayment()" style="padding: 0.8rem 1.5rem; border: none; border-radius: 8px; background: #ccc; cursor: pointer; font-size: 1rem;">Cancel</button>
+                <button id="confirm-payment-btn" style="padding: 0.8rem 1.5rem; border: none; border-radius: 8px; background: #4caf50; color: white; cursor: pointer; font-size: 1rem; font-weight: bold;">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/payment_gateway.js"></script>
+    <script src="/static/js/app.js?v=10"></script>
 </body>
 </html>

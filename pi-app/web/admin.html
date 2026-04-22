@@ -7,461 +7,433 @@
     <style>
         /* ── Global ──────────────────────────────────────────────── */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #f5f7fb;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            color: #111827;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* ── Sidebar ─────────────────────────────────────────────── */
-        .sidebar {
-            width: 220px;
-            background: #111827;
-            color: white;
-            height: 100vh;
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-
-        .sidebar-logo {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: 3px;
-            color: #fff;
-            margin-bottom: 32px;
-            padding: 4px 8px;
-        }
-
-        .sidebar-section {
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: #4b5563;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 0 12px;
-            margin-bottom: 8px;
-            margin-top: 16px;
-        }
-
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 11px 14px;
-            border-radius: 8px;
-            color: #9ca3af;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-            cursor: pointer;
-            transition: background 0.18s, color 0.18s;
-        }
+        body { background: #f5f7fb; font-family: 'Inter', sans-serif; color: #111827; height: 100vh; overflow: hidden; }
+        .container { display: flex; height: 100vh; }
+        .sidebar { width: 220px; background: #111827; color: white; height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-logo { font-size: 1.25rem; font-weight: 800; letter-spacing: 3px; color: #fff; margin-bottom: 32px; padding: 4px 8px; }
+        .sidebar-section { font-size: 0.65rem; font-weight: 700; color: #4b5563; letter-spacing: 2px; text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; margin-top: 16px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 8px; color: #9ca3af; text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; cursor: pointer; transition: background 0.18s, color 0.18s; }
         .sidebar a:hover { background: #1f2937; color: #fff; }
         .sidebar a.active { background: #2563eb; color: white; }
-
-        .sidebar-bottom {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid #1f2937;
-        }
-
-        .sidebar-bottom a {
-            color: #ef4444;
-        }
+        .sidebar-bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid #1f2937; }
+        .sidebar-bottom a { color: #ef4444; }
         .sidebar-bottom a:hover { background: #1f2937; color: #f87171; }
-
-        /* ── Main area ───────────────────────────────────────────── */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* ── Top bar ─────────────────────────────────────────────── */
-        .topbar {
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 16px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 30px; display: flex; justify-content: space-between; align-items: center; }
         .topbar-left h2 { font-size: 1.1rem; font-weight: 700; }
         .topbar-left p  { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
-
-        /* ── Content ─────────────────────────────────────────────── */
-        .content {
-            flex: 1;
-            padding: 28px 30px;
-            overflow-y: auto;
-        }
-
-        /* ── Tab panels ──────────────────────────────────────────── */
-        .tab-panel            { display: none; }
-        .tab-panel.active     { display: block; }
-
-        /* ── Section header row ──────────────────────────────────── */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .content { flex: 1; padding: 28px 30px; overflow-y: auto; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .section-header h3 { font-size: 1rem; font-weight: 700; }
-
-        /* ── Card ────────────────────────────────────────────────── */
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 4px 0;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-        }
-
-        /* ── Stats row (optional) ────────────────────────────────── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 22px;
-        }
-        .stat-card {
-            background: #fff;
-            border-radius: 14px;
-            padding: 20px 22px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-        }
+        .card { background: white; border-radius: 16px; padding: 4px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 24px; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+        .stat-card { background: #fff; border-radius: 14px; padding: 20px 22px; border: 1px solid #e5e7eb; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
         .stat-label { font-size: 0.78rem; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
         .stat-value { font-size: 1.8rem; font-weight: 700; color: #2563eb; }
-
-        /* ── Table ───────────────────────────────────────────────── */
         table { width: 100%; border-collapse: collapse; }
-
-        th {
-            text-align: left;
-            color: #6b7280;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 12px 20px;
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        td {
-            padding: 14px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem;
-        }
-
+        th { text-align: left; color: #6b7280; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 12px 20px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+        td { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f9fafb; }
-
-        /* ── Badge ───────────────────────────────────────────────── */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-block;
-        }
-        .badge.active   { background: #d1fae5; color: #065f46; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge.active { background: #d1fae5; color: #065f46; }
         .badge.inactive { background: #fee2e2; color: #991b1b; }
-        .badge.enabled  { background: #d1fae5; color: #065f46; }
-        .badge.disabled { background: #fee2e2; color: #991b1b; }
-
-        /* ── Buttons ─────────────────────────────────────────────── */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: opacity 0.15s, transform 0.12s;
-        }
+        .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.15s, transform 0.12s; }
         .btn:active { transform: scale(0.97); }
         .btn.primary { background: #2563eb; color: white; }
         .btn.primary:hover { background: #1d4ed8; }
-        .btn.danger  { background: #ef4444; color: white; margin-left: 6px; }
-        .btn.danger:hover  { background: #dc2626; }
-        .btn.ghost   { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-        .btn.ghost:hover  { background: #e5e7eb; }
-
-        /* ── Modal ───────────────────────────────────────────────── */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(17,24,39,0.4);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
-        }
+        .btn.danger { background: #ef4444; color: white; margin-left: 6px; }
+        .btn.danger:hover { background: #dc2626; }
+        .btn.ghost { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .btn.ghost:hover { background: #e5e7eb; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.4); z-index: 300; align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0; }
         .modal-overlay.open { display: flex; }
-
-        .modal {
-            background: #fff;
-            border-radius: 16px;
-            padding: 32px;
-            width: 460px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
-        }
+        .modal { background: #fff; border-radius: 16px; padding: 32px; width: 460px; border: 1px solid #e5e7eb; box-shadow: 0 8px 40px rgba(0,0,0,0.12); position: relative; margin: auto; }
         .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 22px; }
-
         .form-group { margin-bottom: 16px; }
-        .form-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 11px 14px;
-            color: #111827;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.18s, box-shadow 0.18s;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-            background: #fff;
-        }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .form-group input, .form-group select { width: 100%; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 11px 14px; color: #111827; font-size: 0.95rem; outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+        .form-group input:focus, .form-group select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: #fff; }
         .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
 
-        /* ── Recipe Editor ───────────────────────────────────────── */
-        .recipe-editor-modal .modal { width: 700px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+        /* Two columns for drink modal */
+        .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+
+        /* Recipe Editor */
+        .recipe-editor-modal .modal { width: 700px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; margin: auto; }
         .recipe-editor-header { padding: 24px 28px 18px; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
         .recipe-editor-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; }
         .recipe-editor-header p  { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
         .recipe-editor-body  { flex: 1; overflow-y: auto; padding: 20px 28px; }
         .recipe-editor-footer{ padding: 16px 28px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
 
-        .add-ingredient-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-bottom: 20px;
-        }
-        .add-ingredient-row select,
-        .add-ingredient-row input {
-            flex: 1;
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 0.9rem;
-            color: #111827;
-            outline: none;
-        }
+        .add-ingredient-row { display: flex; gap: 10px; align-items: center; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+        .add-ingredient-row select, .add-ingredient-row input { flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; color: #111827; outline: none; }
         .add-ingredient-row input { max-width: 110px; }
-        .add-ingredient-row select:focus,
-        .add-ingredient-row input:focus { border-color: #2563eb; }
-
         .ing-validation { font-size: 0.8rem; color: #ef4444; margin-bottom: 12px; display: none; }
-
         .ingredient-list-table { width: 100%; border-collapse: collapse; }
-        .ingredient-list-table th {
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
-            color: #6b7280; font-weight: 700; padding: 8px 12px;
-            background: #f9fafb; border-bottom: 1px solid #e5e7eb;
-        }
+        .ingredient-list-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7280; font-weight: 700; padding: 8px 12px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
         .ingredient-list-table td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-        .ingredient-list-table tr:last-child td { border-bottom: none; }
         .ing-empty { text-align: center; color: #9ca3af; font-size: 0.9rem; padding: 24px; }
 
-        /* Recipe drinks list */
-        .recipe-drink-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .recipe-drink-row:last-child { border-bottom: none; }
+        .recipe-drink-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; }
         .recipe-drink-row:hover { background: #f9fafb; }
         .recipe-drink-info strong { font-size: 0.95rem; }
-        .recipe-drink-info span   { display:block; font-size:0.8rem; color:#6b7280; margin-top:2px; }
+        .recipe-drink-info span { display:block; font-size:0.8rem; color:#6b7280; margin-top:2px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-
-    <!-- ── Sidebar ──────────────────────────────────────────────── -->
     <div class="sidebar">
         <div class="sidebar-logo">MIXION</div>
 
         <div class="sidebar-section">Menu</div>
-        <a class="active" id="nav-drinks"  onclick="switchTab('drinks', this)">🍹 Drinks</a>
+        <a class="active" id="nav-categories" onclick="switchTab('categories', this)">📁 Menu & Types</a>
+        <a id="nav-ingredients" onclick="switchTab('ingredients', this)">🍎 Ingredients</a>
+        <a id="nav-extras" onclick="switchTab('extras', this)">🧊 Manual Extras</a>
+        <a id="nav-drinks" onclick="switchTab('drinks', this)">🍹 Drinks</a>
         <a id="nav-recipes" onclick="switchTab('recipes', this)">📋 Recipes</a>
 
         <div class="sidebar-section">Hardware</div>
         <a id="nav-bottles" onclick="switchTab('bottles', this)">🧴 Bottles</a>
-        <a id="nav-limits"  onclick="switchTab('limits', this)">⚙️ Limits</a>
 
         <div class="sidebar-section">System</div>
         <a id="nav-transactions" onclick="switchTab('transactions', this)">🧾 Transactions</a>
-        <a id="nav-status"  onclick="switchTab('status', this)">📊 Status</a>
+        <a id="nav-status" onclick="switchTab('status', this)">📊 Status</a>
 
         <div class="sidebar-bottom">
             <a onclick="doLogout()">🚪 Logout</a>
         </div>
     </div>
 
-    <!-- ── Main ─────────────────────────────────────────────────── -->
     <div class="main">
-
-        <!-- Topbar -->
         <div class="topbar">
             <div class="topbar-left">
-                <h2 id="tab-title">Drinks</h2>
-                <p id="tab-sub">Manage drink menu</p>
+                <h2 id="tab-title">Menu & Types</h2>
+                <p id="tab-sub">Manage menu hierarchy & ingredient types</p>
             </div>
         </div>
 
-        <!-- Content -->
         <div class="content">
 
-            <!-- ── Drinks ──────────────────────────────────────── -->
-            <div class="tab-panel active" id="panel-drinks">
+            <!-- CATEGORIES, GROUPS & TYPES -->
+            <div class="tab-panel active" id="panel-categories">
+                
+                <div class="section-header">
+                    <h3>Drink Categories</h3>
+                    <button class="btn primary" onclick="openModal('category')">+ Add Category</button>
+                </div>
+                <div class="card">
+                    <table id="categories-table">
+                        <thead><tr><th>ID</th><th>Category Name</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header" style="margin-top: 32px;">
+                    <h3>UI Groups</h3>
+                    <button class="btn primary" onclick="openModal('group')">+ Add UI Group</button>
+                </div>
+                <div class="card">
+                    <table id="groups-table">
+                        <thead><tr><th>ID</th><th>Parent Category</th><th>Group Name</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header" style="margin-top: 32px;">
+                    <h3>Ingredient Types</h3>
+                    <button class="btn primary" onclick="openModal('ingredient_type')">+ Add Type</button>
+                </div>
+                <div class="card">
+                    <table id="types-table">
+                        <thead><tr><th>ID</th><th>Ingredient Type</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header" style="margin-top: 32px;">
+                    <h3>Glasses</h3>
+                    <button class="btn primary" onclick="openModal('glass')">+ Add Glass</button>
+                </div>
+                <div class="card">
+                    <table id="glasses-table">
+                        <thead><tr><th>ID</th><th>Glass Name</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header" style="margin-top: 32px;">
+                    <h3>Preparation Methods</h3>
+                    <button class="btn primary" onclick="openModal('method')">+ Add Method</button>
+                </div>
+                <div class="card">
+                    <table id="methods-table">
+                        <thead><tr><th>ID</th><th>Method Name</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- INGREDIENTS -->
+            <div class="tab-panel" id="panel-ingredients">
+                <div class="section-header">
+                    <h3>Master Ingredients</h3>
+                    <button class="btn primary" onclick="openModal('ingredient')">+ Add Ingredient</button>
+                </div>
+                <div class="card">
+                    <table id="ingredients-table">
+                        <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EXTRAS -->
+            <div class="tab-panel" id="panel-extras">
+                <div class="section-header">
+                    <h3>Manual Extras</h3>
+                    <button class="btn primary" onclick="openModal('extra')">+ Add Extra</button>
+                </div>
+                <div class="card">
+                    <table id="extras-table">
+                        <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DRINKS -->
+            <div class="tab-panel" id="panel-drinks">
                 <div class="section-header">
                     <h3>All Drinks</h3>
                     <button class="btn primary" onclick="openModal('drink')">+ Add Drink</button>
                 </div>
                 <div class="card">
                     <table id="drinks-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>UI Group</th><th>Glass</th><th>Method</th><th>Ice</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ── Recipes ─────────────────────────────────────── -->
+            <!-- RECIPES -->
             <div class="tab-panel" id="panel-recipes">
                 <div class="section-header">
                     <h3>Recipes</h3>
-                    <span style="font-size:0.85rem;color:#6b7280">Click a drink to edit its ingredients</span>
+                    <span style="font-size:0.85rem;color:#6b7280">Click a drink to edit its ingredients & extras</span>
                 </div>
-                <div class="card" id="recipes-drinks-list">
-                    <!-- Populated by loadRecipes() -->
-                </div>
+                <div class="card" id="recipes-drinks-list"></div>
             </div>
 
-            <!-- ── Bottles ─────────────────────────────────────── -->
+            <!-- BOTTLES -->
             <div class="tab-panel" id="panel-bottles">
+                
                 <div class="section-header">
-                    <h3>All Bottles</h3>
+                    <h3>Hardware Lines</h3>
+                    <button class="btn primary" onclick="openModal('line')">+ Add Line</button>
+                </div>
+                <div class="card" style="margin-bottom: 32px;">
+                    <table id="lines-table">
+                        <thead><tr><th>ID</th><th>Line Name (Relay)</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header">
+                    <h3>Machine Bottles</h3>
                     <button class="btn primary" onclick="openModal('bottle')">+ Add Bottle</button>
                 </div>
                 <div class="card">
                     <table id="bottles-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Pos</th><th>Flow</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Hardware Line</th><th>Ingredient</th><th>Flow</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ── Limits ──────────────────────────────────────── -->
-            <div class="tab-panel" id="panel-limits">
-                <div class="section-header">
-                    <h3>Custom Limits</h3>
-                    <button class="btn primary" onclick="openModal('limit')">+ Set Limit</button>
-                </div>
-                <div class="card">
-                    <table id="limits-table">
-                        <thead><tr><th>ID</th><th>Bottle</th><th>Min (ml)</th><th>Max (ml)</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ── Transactions ────────────────────────────────── -->
+            <!-- TRANSACTIONS -->
             <div class="tab-panel" id="panel-transactions">
                 <div class="section-header">
-                    <h3>Transactions</h3>
+                    <h3>Order History</h3>
                     <button class="btn ghost" onclick="loadTransactions()">🔄 Refresh</button>
                 </div>
                 <div class="card">
                     <table id="transactions-table">
-                        <thead><tr><th>ID</th><th>Time</th><th>Drink</th><th>Amount</th><th>Status</th><th>Ingredients Used</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Time</th><th>Drink ID</th><th>Drink Name</th><th>Status</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ── Status ──────────────────────────────────────── -->
+            <!-- STATUS -->
             <div class="tab-panel" id="panel-status">
                 <div class="section-header">
                     <h3>System Status</h3>
                     <button class="btn primary" onclick="loadStatus()">🔄 Refresh</button>
                 </div>
                 <div class="stats-row">
-                    <div class="stat-card">
-                        <div class="stat-label">Device Status</div>
-                        <div class="stat-value" id="s-device">—</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Active Sessions</div>
-                        <div class="stat-value" id="s-sessions">—</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Server Time</div>
-                        <div class="stat-value" style="font-size:1rem;padding-top:4px" id="s-time">—</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-label">Device Status</div><div class="stat-value" id="s-device">—</div></div>
+                    <div class="stat-card"><div class="stat-label">Active Sessions</div><div class="stat-value" id="s-sessions">—</div></div>
+                    <div class="stat-card"><div class="stat-label">Server Time</div><div class="stat-value" style="font-size:1rem;padding-top:4px" id="s-time">—</div></div>
                 </div>
             </div>
 
-        </div><!-- /content -->
-    </div><!-- /main -->
-</div><!-- /container -->
+        </div>
+    </div>
+</div>
 
-<!-- ═════════════════ MODALS ════════════════════════════════ -->
+<!-- MODALS -->
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="modal-category">
+    <div class="modal">
+        <h3 id="modal-category-title">Add Category</h3>
+        <input type="hidden" id="cat-id">
+        <div class="form-group"><label>Category Name</label><input type="text" id="cat-name" placeholder="e.g. Cocktail"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('category')">Cancel</button>
+            <button class="btn primary" onclick="saveCategory()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Group Modal -->
+<div class="modal-overlay" id="modal-group">
+    <div class="modal">
+        <h3 id="modal-group-title">Add UI Group</h3>
+        <input type="hidden" id="group-id">
+        <div class="form-group"><label>Parent Category</label><select id="group-cat-id"></select></div>
+        <div class="form-group"><label>Group Name</label><input type="text" id="group-name" placeholder="e.g. Vodka Classics"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('group')">Cancel</button>
+            <button class="btn primary" onclick="saveGroup()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Ingredient Type Modal -->
+<div class="modal-overlay" id="modal-ingredient_type">
+    <div class="modal">
+        <h3 id="modal-ingredient_type-title">Add Ingredient Type</h3>
+        <input type="hidden" id="type-id">
+        <div class="form-group"><label>Type Name</label><input type="text" id="type-name" placeholder="e.g. Spirit"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('ingredient_type')">Cancel</button>
+            <button class="btn primary" onclick="saveIngredientType()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Glass Modal -->
+<div class="modal-overlay" id="modal-glass">
+    <div class="modal">
+        <h3 id="modal-glass-title">Add Glass</h3>
+        <input type="hidden" id="glass-id">
+        <div class="form-group"><label>Glass Name</label><input type="text" id="glass-name" placeholder="e.g. Highball"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('glass')">Cancel</button>
+            <button class="btn primary" onclick="saveGlass()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Method Modal -->
+<div class="modal-overlay" id="modal-method">
+    <div class="modal">
+        <h3 id="modal-method-title">Add Method</h3>
+        <input type="hidden" id="method-id">
+        <div class="form-group"><label>Method Name</label><input type="text" id="method-name" placeholder="e.g. Machine+Stir"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('method')">Cancel</button>
+            <button class="btn primary" onclick="saveMethod()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Ingredient Modal -->
+<div class="modal-overlay" id="modal-ingredient">
+    <div class="modal">
+        <h3 id="modal-ingredient-title">Add Ingredient</h3>
+        <input type="hidden" id="ing-id">
+        <div class="form-group"><label>Name</label><input type="text" id="ing-name" placeholder="e.g. Vodka"></div>
+        <div class="form-group"><label>Type</label>
+            <select id="ing-type-id"></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+            <select id="ing-enabled"><option value="1">Enabled</option><option value="0">Disabled</option></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('ingredient')">Cancel</button>
+            <button class="btn primary" onclick="saveIngredient()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Extra Modal -->
+<div class="modal-overlay" id="modal-extra">
+    <div class="modal">
+        <h3 id="modal-extra-title">Add Manual Extra</h3>
+        <input type="hidden" id="extra-id">
+        <div class="form-group"><label>Extra Name</label><input type="text" id="extra-name" placeholder="e.g. Ice or Soda"></div>
+        <div class="form-group"><label>Price (₹)</label><input type="number" step="0.01" id="extra-price" placeholder="0.00"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('extra')">Cancel</button>
+            <button class="btn primary" onclick="saveExtra()">Save</button>
+        </div>
+    </div>
+</div>
 
 <!-- Drink Modal -->
 <div class="modal-overlay" id="modal-drink">
-    <div class="modal">
+    <div class="modal" style="width: 500px;">
         <h3 id="modal-drink-title">Add Drink</h3>
-        <input type="hidden" id="drink-id">
-        <div class="form-group"><label>Name</label><input type="text" id="drink-name" placeholder="e.g. Mojito"></div>
-        <div class="form-group"><label>Price (₹)</label><input type="number" id="drink-price" placeholder="0"></div>
-        <div class="form-group"><label>Status</label>
-            <select id="drink-active"><option value="1">Active</option><option value="0">Inactive</option></select>
+        <input type="hidden" id="drink-edit-mode" value="false">
+        
+        <div class="form-row">
+            <div class="form-group"><label>Drink ID</label><input type="text" id="drink-id" placeholder="e.g. CK01"></div>
+            <div class="form-group"><label>Name</label><input type="text" id="drink-name" placeholder="e.g. Margarita"></div>
         </div>
+        
+        <div class="form-row">
+            <div class="form-group"><label>Category</label><select id="drink-cat-id" onchange="updateDrinkGroupSelect()"></select></div>
+            <div class="form-group"><label>UI Group</label><select id="drink-group-id"></select></div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group"><label>Glass</label><select id="drink-glass-id"></select></div>
+            <div class="form-group"><label>Method</label><select id="drink-method-id"></select></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group"><label>Ice Included?</label><select id="drink-ice"><option value="1">Yes</option><option value="0">No</option></select></div>
+            <div class="form-group"><label>Price (₹)</label><input type="number" id="drink-price" placeholder="0"></div>
+        </div>
+        
+        <div class="form-group"><label>Status</label>
+            <select id="drink-enabled"><option value="1">Enabled</option><option value="0">Disabled</option></select>
+        </div>
+        
         <div class="modal-actions">
             <button class="btn ghost" onclick="closeModal('drink')">Cancel</button>
             <button class="btn primary" onclick="saveDrink()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Line Modal -->
+<div class="modal-overlay" id="modal-line">
+    <div class="modal">
+        <h3 id="modal-line-title">Add Hardware Line</h3>
+        <input type="hidden" id="line-id">
+        <div class="form-group"><label>Line Name</label><input type="text" id="line-name" placeholder="e.g. R1"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" onclick="closeModal('line')">Cancel</button>
+            <button class="btn primary" onclick="saveLine()">Save</button>
         </div>
     </div>
 </div>
@@ -471,8 +443,8 @@
     <div class="modal">
         <h3 id="modal-bottle-title">Add Bottle</h3>
         <input type="hidden" id="bottle-id">
-        <div class="form-group"><label>Name</label><input type="text" id="bottle-name" placeholder="e.g. Cola"></div>
-        <div class="form-group"><label>Relay Position</label><input type="number" id="bottle-pos" placeholder="1"></div>
+        <div class="form-group"><label>Hardware Line</label><select id="bottle-line-id"></select></div>
+        <div class="form-group"><label>Ingredient</label><select id="bottle-ingredient"></select></div>
         <div class="form-group"><label>Flow Rate (ml/sec)</label><input type="number" step="0.1" id="bottle-flow" placeholder="5.0"></div>
         <div class="form-group"><label>Capacity (ml)</label><input type="number" id="bottle-capacity" placeholder="1000"></div>
         <div class="form-group"><label>Current Level (ml)</label><input type="number" id="bottle-current" placeholder="1000"></div>
@@ -491,40 +463,39 @@
     <div class="modal">
         <div class="recipe-editor-header">
             <h3 id="recipe-editor-drink-name">Edit Recipe</h3>
-            <p id="recipe-editor-drink-sub">Add or remove ingredients for this drink</p>
+            <p id="recipe-editor-drink-sub">Add or remove machine ingredients and manual extras</p>
         </div>
         <div class="recipe-editor-body">
-            <!-- Add ingredient row -->
+            <!-- Machine Ingredients -->
+            <div style="font-weight: 700; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Machine Ingredients</div>
             <div class="add-ingredient-row">
-                <select id="recipe-bottle-select"><option value="">Select bottle...</option></select>
+                <select id="recipe-ingredient-select"><option value="">Select ingredient...</option></select>
                 <input type="number" id="recipe-amount" placeholder="Amount (ml)" min="1">
                 <button class="btn primary" onclick="addIngredientRow()">+ Add</button>
             </div>
             <div class="ing-validation" id="ing-error"></div>
-
-            <!-- Current ingredients table -->
             <table class="ingredient-list-table">
-                <thead><tr><th>Bottle</th><th>Amount</th><th></th></tr></thead>
+                <thead><tr><th>Ingredient</th><th>Amount</th><th></th></tr></thead>
                 <tbody id="ingredient-rows"></tbody>
+            </table>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+            
+            <!-- Manual Extras -->
+            <div style="font-weight: 700; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Manual Extras</div>
+            <div class="add-ingredient-row">
+                <select id="recipe-extra-select"><option value="">Select manual extra...</option></select>
+                <button class="btn primary" onclick="addExtraRow()">+ Add Extra</button>
+            </div>
+            <div class="ing-validation" id="extra-error"></div>
+            <table class="ingredient-list-table">
+                <thead><tr><th>Extra Name</th><th></th></tr></thead>
+                <tbody id="extra-rows"></tbody>
             </table>
         </div>
         <div class="recipe-editor-footer">
             <button class="btn ghost" onclick="closeModal('recipe')">Cancel</button>
             <button class="btn primary" onclick="saveRecipe()">💾 Save Recipe</button>
-        </div>
-    </div>
-</div>
-
-<!-- Limit Modal -->
-<div class="modal-overlay" id="modal-limit">
-    <div class="modal">
-        <h3>Set Bottle Limit</h3>
-        <div class="form-group"><label>Bottle</label><select id="limit-bottle-id"></select></div>
-        <div class="form-group"><label>Min (ml)</label><input type="number" id="limit-min" value="0"></div>
-        <div class="form-group"><label>Max (ml)</label><input type="number" id="limit-max" value="200"></div>
-        <div class="modal-actions">
-            <button class="btn ghost" onclick="closeModal('limit')">Cancel</button>
-            <button class="btn primary" onclick="saveLimit()">Save</button>
         </div>
     </div>
 </div>
@@ -543,7 +514,6 @@
     </div>
 </div>
 
-<!-- ═════════════════ SCRIPT ════════════════════════════════ -->
 <script>
 const TOKEN = localStorage.getItem('admin_token');
 if (!TOKEN) window.location.href = '/login';
@@ -556,15 +526,22 @@ const API = (path, opts = {}) => fetch('/api' + path, {
     return r.json();
 });
 
-// ── Navigation ───────────────────────────────────────────────
 const tabMeta = {
+    categories: { title: 'Menu & Types', sub: 'Manage menu hierarchy, glasses, & methods' },
+    ingredients: { title: 'Ingredients', sub: 'Manage master liquid list' },
+    extras:  { title: 'Manual Extras', sub: 'Manage manual additions like Soda' },
     drinks:  { title: 'Drinks',  sub: 'Manage drink menu'  },
-    recipes: { title: 'Recipes', sub: 'Define drink ingredients' },
+    recipes: { title: 'Recipes', sub: 'Define drink ingredients & extras' },
     bottles: { title: 'Bottles', sub: 'Manage pump bottles' },
-    limits:  { title: 'Limits',  sub: 'Set min/max per ingredient' },
     transactions: { title: 'Transactions', sub: 'Order history' },
     status:  { title: 'Status',  sub: 'System information' }
 };
+
+let cachedCategories = [];
+let cachedGroups = [];
+let cachedTypes = [];
+let cachedGlasses = [];
+let cachedMethods = [];
 
 function switchTab(name, el) {
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
@@ -573,282 +550,483 @@ function switchTab(name, el) {
     document.getElementById('panel-' + name).classList.add('active');
     document.getElementById('tab-title').textContent = tabMeta[name].title;
     document.getElementById('tab-sub').textContent   = tabMeta[name].sub;
-    if (name === 'drinks')  loadDrinks();
+    
+    if (name === 'categories') loadCategoriesAndGroups();
+    if (name === 'ingredients') loadIngredients();
+    if (name === 'extras') loadExtras();
+    if (name === 'drinks') loadDrinks();
     if (name === 'recipes') loadRecipes();
     if (name === 'bottles') loadBottles();
-    if (name === 'limits')  loadLimits();
     if (name === 'transactions') loadTransactions();
-    if (name === 'status')  loadStatus();
+    if (name === 'status') loadStatus();
 }
 
-// ── Modals ───────────────────────────────────────────────────
-function openModal(type, data = null) {
-    if (type === 'drink') {
-        document.getElementById('drink-id').value     = data?.id ?? '';
-        document.getElementById('drink-name').value   = data?.name ?? '';
-        document.getElementById('drink-price').value  = data?.price ?? 0;
-        document.getElementById('drink-active').value = data?.active ?? 1;
+async function openModal(type, data = null) {
+    if (type === 'category') {
+        document.getElementById('cat-id').value = data?.id ?? '';
+        document.getElementById('cat-name').value = data?.name ?? '';
+        document.getElementById('modal-category-title').textContent = data ? 'Edit Category' : 'Add Category';
+    } else if (type === 'group') {
+        document.getElementById('group-id').value = data?.id ?? '';
+        document.getElementById('group-name').value = data?.name ?? '';
+        
+        cachedCategories = await API('/admin/categories');
+        document.getElementById('group-cat-id').innerHTML = cachedCategories.map(c => 
+            `<option value="${c.id}" ${data?.category_id === c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+        
+        document.getElementById('modal-group-title').textContent = data ? 'Edit Group' : 'Add Group';
+    } else if (type === 'ingredient_type') {
+        document.getElementById('type-id').value = data?.id ?? '';
+        document.getElementById('type-name').value = data?.name ?? '';
+        document.getElementById('modal-ingredient_type-title').textContent = data ? 'Edit Type' : 'Add Type';
+    } else if (type === 'glass') {
+        document.getElementById('glass-id').value = data?.id ?? '';
+        document.getElementById('glass-name').value = data?.name ?? '';
+        document.getElementById('modal-glass-title').textContent = data ? 'Edit Glass' : 'Add Glass';
+    } else if (type === 'method') {
+        document.getElementById('method-id').value = data?.id ?? '';
+        document.getElementById('method-name').value = data?.name ?? '';
+        document.getElementById('modal-method-title').textContent = data ? 'Edit Method' : 'Add Method';
+    } else if (type === 'ingredient') {
+        document.getElementById('ing-id').value = data?.id ?? '';
+        document.getElementById('ing-name').value = data?.name ?? '';
+        document.getElementById('ing-enabled').value = data?.enabled ?? 1;
+        
+        cachedTypes = await API('/admin/ingredient_types');
+        document.getElementById('ing-type-id').innerHTML = '<option value="">Select Type</option>' + cachedTypes.map(t => 
+            `<option value="${t.id}" ${data?.type_id === t.id ? 'selected' : ''}>${t.name}</option>`
+        ).join('');
+        
+        document.getElementById('modal-ingredient-title').textContent = data ? 'Edit Ingredient' : 'Add Ingredient';
+    } else if (type === 'extra') {
+        document.getElementById('extra-id').value = data?.id ?? '';
+        document.getElementById('extra-name').value = data?.name ?? '';
+        document.getElementById('extra-price').value = data?.price ?? 0;
+        document.getElementById('modal-extra-title').textContent = data ? 'Edit Extra' : 'Add Extra';
+    } else if (type === 'line') {
+        document.getElementById('line-id').value = data?.id ?? '';
+        document.getElementById('line-name').value = data?.name ?? '';
+        document.getElementById('modal-line-title').textContent = data ? 'Edit Line' : 'Add Line';
+    } else if (type === 'drink') {
+        document.getElementById('drink-edit-mode').value = data ? 'true' : 'false';
+        document.getElementById('drink-id').value = data?.id ?? '';
+        document.getElementById('drink-id').disabled = !!data;
+        document.getElementById('drink-name').value = data?.name ?? '';
+        document.getElementById('drink-price').value = data?.price ?? 0;
+        document.getElementById('drink-enabled').value = data?.enabled ?? 1;
+        document.getElementById('drink-ice').value = data?.has_ice ?? 1;
+        
+        cachedCategories = await API('/admin/categories');
+        cachedGroups = await API('/admin/groups');
+        cachedGlasses = await API('/admin/glasses');
+        cachedMethods = await API('/admin/methods');
+        
+        document.getElementById('drink-cat-id').innerHTML = '<option value="">Select Category</option>' + cachedCategories.map(c => 
+            `<option value="${c.id}" ${data?.category_id === c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+        
+        document.getElementById('drink-glass-id').innerHTML = '<option value="">Select Glass</option>' + cachedGlasses.map(g => 
+            `<option value="${g.id}" ${data?.glass_id === g.id ? 'selected' : ''}>${g.name}</option>`
+        ).join('');
+
+        document.getElementById('drink-method-id').innerHTML = '<option value="">Select Method</option>' + cachedMethods.map(m => 
+            `<option value="${m.id}" ${data?.method_id === m.id ? 'selected' : ''}>${m.name}</option>`
+        ).join('');
+
+        updateDrinkGroupSelect(data?.ui_group_id);
+        
         document.getElementById('modal-drink-title').textContent = data ? 'Edit Drink' : 'Add Drink';
     } else if (type === 'bottle') {
-        document.getElementById('bottle-id').value      = data?.id ?? '';
-        document.getElementById('bottle-name').value    = data?.name ?? '';
-        document.getElementById('bottle-pos').value     = data?.position ?? '';
-        document.getElementById('bottle-flow').value    = data?.flow_rate ?? '';
+        document.getElementById('bottle-id').value = data?.id ?? '';
+        document.getElementById('bottle-flow').value = data?.flow_rate ?? '5.0';
         document.getElementById('bottle-capacity').value = data?.capacity_ml ?? 1000;
         document.getElementById('bottle-current').value = data?.current_ml ?? 1000;
         document.getElementById('bottle-enabled').value = data?.enabled ?? 1;
+        
+        API('/admin/lines').then(lines => {
+            document.getElementById('bottle-line-id').innerHTML = '<option value="">Select Line</option>' + 
+                lines.map(l => `<option value="${l.id}" ${data?.line_id === l.id ? 'selected' : ''}>${l.name}</option>`).join('');
+        });
+
+        API('/admin/ingredients').then(ings => {
+            document.getElementById('bottle-ingredient').innerHTML = '<option value="">None</option>' +
+                ings.map(i => `<option value="${i.id}" ${data?.ingredient_id === i.id ? 'selected' : ''}>${i.name}</option>`).join('');
+        });
         document.getElementById('modal-bottle-title').textContent = data ? 'Edit Bottle' : 'Add Bottle';
     } else if (type === 'refill') {
         document.getElementById('refill-bottle-id').value = data.id;
-        document.getElementById('refill-bottle-name').textContent = data.name + ' (Capacity: ' + data.capacity_ml + 'ml)';
+        document.getElementById('refill-bottle-name').textContent = `Line: ${data.line_name} - ${data.ingredient_name || 'Empty'} (Capacity: ${data.capacity_ml}ml)`;
         document.getElementById('refill-amount').value = data.capacity_ml;
-    } else if (type === 'limit') {
-        const sel = document.getElementById('limit-bottle-id');
-        sel.innerHTML = '<option value="">Select bottle...</option>' + 
-            _allBottles.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-        document.getElementById('limit-min').value = '0';
-        document.getElementById('limit-max').value = '200';
     }
     document.getElementById('modal-' + type).classList.add('open');
 }
-function closeModal(type) { document.getElementById('modal-' + type).classList.remove('open'); }
 
-// ── Drinks ───────────────────────────────────────────────────
+function updateDrinkGroupSelect(selectedGroupId = null) {
+    const catId = document.getElementById('drink-cat-id').value;
+    const filteredGroups = cachedGroups.filter(g => g.category_id == catId);
+    document.getElementById('drink-group-id').innerHTML = '<option value="">Select Group</option>' + filteredGroups.map(g => 
+        `<option value="${g.id}" ${selectedGroupId === g.id ? 'selected' : ''}>${g.name}</option>`
+    ).join('');
+}
+
+function closeModal(type) { document.getElementById('modal-' + type).classList.remove('open'); }
+function doLogout() { API('/admin/logout', {method:'POST'}).then(()=>{ localStorage.removeItem('admin_token'); window.location.href='/login'; }); }
+
+// ── Categories, Groups, Types, Glasses, Methods
+async function loadCategoriesAndGroups() {
+    const cats = await API('/admin/categories');
+    document.querySelector('#categories-table tbody').innerHTML = cats.map(c => `
+        <tr>
+            <td>${c.id}</td><td><strong>${c.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("category",${JSON.stringify(c)})'>Edit</button>
+                <button class="btn danger" onclick="deleteCategory(${c.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+        
+    const groups = await API('/admin/groups');
+    document.querySelector('#groups-table tbody').innerHTML = groups.map(g => `
+        <tr>
+            <td>${g.id}</td><td>${g.category_name}</td><td><strong>${g.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("group",${JSON.stringify(g)})'>Edit</button>
+                <button class="btn danger" onclick="deleteGroup(${g.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+        
+    const types = await API('/admin/ingredient_types');
+    document.querySelector('#types-table tbody').innerHTML = types.map(t => `
+        <tr>
+            <td>${t.id}</td><td><strong>${t.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("ingredient_type",${JSON.stringify(t)})'>Edit</button>
+                <button class="btn danger" onclick="deleteIngredientType(${t.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+
+    const glasses = await API('/admin/glasses');
+    document.querySelector('#glasses-table tbody').innerHTML = glasses.map(g => `
+        <tr>
+            <td>${g.id}</td><td><strong>${g.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("glass",${JSON.stringify(g)})'>Edit</button>
+                <button class="btn danger" onclick="deleteGlass(${g.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+
+    const methods = await API('/admin/methods');
+    document.querySelector('#methods-table tbody').innerHTML = methods.map(m => `
+        <tr>
+            <td>${m.id}</td><td><strong>${m.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("method",${JSON.stringify(m)})'>Edit</button>
+                <button class="btn danger" onclick="deleteMethod(${m.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+}
+
+async function saveCategory() {
+    const id = document.getElementById('cat-id').value;
+    const body = { name: document.getElementById('cat-name').value };
+    if (id) await API(`/admin/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/categories', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('category'); loadCategoriesAndGroups();
+}
+async function deleteCategory(id) { if (confirm('Delete this category? This removes sub-groups.')) { await API(`/admin/categories/${id}`, {method:'DELETE'}); loadCategoriesAndGroups(); } }
+
+async function saveGroup() {
+    const id = document.getElementById('group-id').value;
+    const body = { category_id: +document.getElementById('group-cat-id').value, name: document.getElementById('group-name').value };
+    if (id) await API(`/admin/groups/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/groups', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('group'); loadCategoriesAndGroups();
+}
+async function deleteGroup(id) { if (confirm('Delete this group?')) { await API(`/admin/groups/${id}`, {method:'DELETE'}); loadCategoriesAndGroups(); } }
+
+async function saveIngredientType() {
+    const id = document.getElementById('type-id').value;
+    const body = { name: document.getElementById('type-name').value };
+    if (id) await API(`/admin/ingredient_types/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/ingredient_types', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('ingredient_type'); loadCategoriesAndGroups();
+}
+async function deleteIngredientType(id) { if (confirm('Delete this type? This deletes linked ingredients.')) { await API(`/admin/ingredient_types/${id}`, {method:'DELETE'}); loadCategoriesAndGroups(); } }
+
+async function saveGlass() {
+    const id = document.getElementById('glass-id').value;
+    const body = { name: document.getElementById('glass-name').value };
+    if (id) await API(`/admin/glasses/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/glasses', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('glass'); loadCategoriesAndGroups();
+}
+async function deleteGlass(id) { if (confirm('Delete this glass?')) { await API(`/admin/glasses/${id}`, {method:'DELETE'}); loadCategoriesAndGroups(); } }
+
+async function saveMethod() {
+    const id = document.getElementById('method-id').value;
+    const body = { name: document.getElementById('method-name').value };
+    if (id) await API(`/admin/methods/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/methods', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('method'); loadCategoriesAndGroups();
+}
+async function deleteMethod(id) { if (confirm('Delete this method?')) { await API(`/admin/methods/${id}`, {method:'DELETE'}); loadCategoriesAndGroups(); } }
+
+
+// ── Ingredients & Extras
+async function loadIngredients() {
+    const data = await API('/admin/ingredients');
+    document.querySelector('#ingredients-table tbody').innerHTML = data.map(i => `
+        <tr>
+            <td>${i.id}</td><td><strong>${i.name}</strong></td><td>${i.type_name}</td>
+            <td><span class="badge ${i.enabled ? 'active' : 'inactive'}">${i.enabled ? 'Enabled' : 'Disabled'}</span></td>
+            <td>
+                <button class="btn primary" onclick='openModal("ingredient",${JSON.stringify(i)})'>Edit</button>
+                <button class="btn danger" onclick="deleteIngredient(${i.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+}
+async function saveIngredient() {
+    const id = document.getElementById('ing-id').value;
+    const typeId = document.getElementById('ing-type-id').value;
+    
+    if(!typeId) return alert("Ingredient Type is required.");
+    
+    const body = { name: document.getElementById('ing-name').value, type_id: +typeId, enabled: +document.getElementById('ing-enabled').value };
+    if (id) await API(`/admin/ingredients/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/ingredients', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('ingredient'); loadIngredients();
+}
+async function deleteIngredient(id) { if (confirm('Delete this ingredient?')) { await API(`/admin/ingredients/${id}`, {method:'DELETE'}); loadIngredients(); } }
+
+async function loadExtras() {
+    const data = await API('/admin/extras');
+    document.querySelector('#extras-table tbody').innerHTML = data.map(e => `
+        <tr>
+            <td>${e.id}</td><td><strong>${e.name}</strong></td><td>₹${Number(e.price || 0).toFixed(2)}</td>
+            <td>
+                <button class="btn primary" onclick='openModal("extra",${JSON.stringify(e)})'>Edit</button>
+                <button class="btn danger" onclick="deleteExtra(${e.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+}
+async function saveExtra() {
+    const id = document.getElementById('extra-id').value;
+    const body = { name: document.getElementById('extra-name').value, price: +document.getElementById('extra-price').value };
+    if (id) await API(`/admin/extras/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/extras', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('extra'); loadExtras();
+}
+async function deleteExtra(id) { if (confirm('Delete this extra?')) { await API(`/admin/extras/${id}`, {method:'DELETE'}); loadExtras(); } }
+
+// ── Drinks
 async function loadDrinks() {
     const data = await API('/admin/drinks');
     document.querySelector('#drinks-table tbody').innerHTML = data.map(d => `
         <tr>
-            <td>${d.id}</td>
-            <td><strong>${d.name}</strong></td>
+            <td>${d.id}</td><td><strong>${d.name}</strong></td><td>${d.category_name}</td><td>${d.group_name}</td>
+            <td>${d.glass_name}</td><td>${d.method_name}</td><td>${d.has_ice ? '🧊 Yes' : 'No'}</td>
             <td>₹${d.price}</td>
-            <td><span class="badge ${d.active ? 'active' : 'inactive'}">${d.active ? 'Active' : 'Inactive'}</span></td>
+            <td><span class="badge ${d.enabled ? 'active' : 'inactive'}">${d.enabled ? 'Enabled' : 'Disabled'}</span></td>
             <td>
                 <button class="btn primary" onclick='openModal("drink",${JSON.stringify(d)})'>Edit</button>
-                <button class="btn danger"  onclick="deleteDrink(${d.id})">Delete</button>
+                <button class="btn danger" onclick="deleteDrink('${d.id}')">Delete</button>
             </td>
         </tr>`).join('');
 }
 async function saveDrink() {
-    const id   = document.getElementById('drink-id').value;
-    const body = { name: document.getElementById('drink-name').value, price: +document.getElementById('drink-price').value, active: +document.getElementById('drink-active').value };
-    if (id) await API(`/admin/drinks/${id}`, { method: 'PUT',  body: JSON.stringify(body) });
-    else    await API('/admin/drinks',         { method: 'POST', body: JSON.stringify(body) });
+    const isEdit = document.getElementById('drink-edit-mode').value === 'true';
+    const id = document.getElementById('drink-id').value;
+    const catId = document.getElementById('drink-cat-id').value;
+    const groupId = document.getElementById('drink-group-id').value;
+    const glassId = document.getElementById('drink-glass-id').value;
+    const methodId = document.getElementById('drink-method-id').value;
+    
+    if(!catId || !groupId || !glassId || !methodId) return alert("Category, Group, Glass, and Method are required.");
+    
+    const body = { 
+        id, 
+        name: document.getElementById('drink-name').value, 
+        category_id: +catId, 
+        ui_group_id: +groupId, 
+        glass_id: +glassId,
+        method_id: +methodId,
+        has_ice: +document.getElementById('drink-ice').value,
+        price: +document.getElementById('drink-price').value, 
+        enabled: +document.getElementById('drink-enabled').value 
+    };
+    if (isEdit) await API(`/admin/drinks/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/drinks', { method: 'POST', body: JSON.stringify(body) });
     closeModal('drink'); loadDrinks();
 }
-async function deleteDrink(id) {
-    if (!confirm('Delete this drink?')) return;
-    await API(`/admin/drinks/${id}`, { method: 'DELETE' }); loadDrinks();
-}
+async function deleteDrink(id) { if (confirm('Delete this drink?')) { await API(`/admin/drinks/${id}`, {method:'DELETE'}); loadDrinks(); } }
 
-// ── Recipes ──────────────────────────────────────────────────
-let _recipeDrinkId   = null;   // currently editing drink
-let _pendingIngredients = [];  // local edit state (not saved yet)
-let _allBottles = [];          // cached for dropdowns
+// ── Recipes
+let _recipeDrinkId = null, _pendingIngredients = [], _pendingExtras = [];
+let _allIngredients = [], _allExtras = [];
 
 async function loadRecipes() {
-    // Show list of drinks, each with an "Edit Recipe" button
     const drinks = await API('/admin/drinks');
-    _allBottles  = await API('/admin/bottles');
-
+    _allIngredients = await API('/admin/ingredients');
+    _allExtras = await API('/admin/extras');
+    
     const list = document.getElementById('recipes-drinks-list');
-    if (!drinks.length) {
-        list.innerHTML = '<p class="ing-empty">No drinks found. Add drinks first.</p>';
-        return;
-    }
-
-    // Render drink rows with ingredient counts
-    // We load counts lazily via individual requests only when opened
+    if (!drinks.length) { list.innerHTML = '<p class="ing-empty">No drinks found.</p>'; return; }
     list.innerHTML = drinks.map(d => `
         <div class="recipe-drink-row">
             <div class="recipe-drink-info">
                 <strong>${d.name}</strong>
-                <span>ID: ${d.id} &nbsp;|&nbsp; ₹${d.price} &nbsp;|&nbsp;
-                    <span class="badge ${d.active ? 'active' : 'inactive'}">${d.active ? 'Active' : 'Inactive'}</span>
-                </span>
+                <span>ID: ${d.id} | ${d.category_name} | ${d.group_name}</span>
             </div>
-            <button class="btn primary" onclick="openRecipeEditor(${d.id}, '${d.name.replace(/'/g,"&apos;")}')">
-                ✏️ Edit Recipe
-            </button>
+            <button class="btn primary" onclick="openRecipeEditor('${d.id}', '${d.name.replace(/'/g,"&apos;")}')">✏️ Edit Recipe</button>
         </div>`).join('');
 }
-
 async function openRecipeEditor(drinkId, drinkName) {
     _recipeDrinkId = drinkId;
-
-    // Load current ingredients from backend
-    const rows = await API(`/admin/recipes/${drinkId}`);
-    _pendingIngredients = rows.map(r => ({ id: r.id, bottle_id: r.bottle_id, bottle_name: r.bottle_name, amount_ml: r.amount_ml }));
-
+    const res = await API(`/admin/recipes/${drinkId}`);
+    _pendingIngredients = res.ingredients.map(r => ({ ingredient_id: r.ingredient_id, ingredient_name: r.ingredient_name, amount_ml: r.amount_ml }));
+    _pendingExtras = res.extras.map(e => ({ extra_id: e.extra_id, extra_name: e.extra_name }));
+    
     document.getElementById('recipe-editor-drink-name').textContent = `Recipe: ${drinkName}`;
-    document.getElementById('recipe-editor-drink-sub').textContent  = `Editing ingredients for drink ID ${drinkId}`;
-
-    // Populate bottle dropdown
-    const sel = document.getElementById('recipe-bottle-select');
-    sel.innerHTML = '<option value="">Select bottle...</option>' +
-        _allBottles.map(b => `<option value="${b.id}" data-name="${b.name}">${b.name}</option>`).join('');
-
+    document.getElementById('recipe-ingredient-select').innerHTML = '<option value="">Select ingredient...</option>' + _allIngredients.map(i => `<option value="${i.id}" data-name="${i.name}">${i.name}</option>`).join('');
+    document.getElementById('recipe-extra-select').innerHTML = '<option value="">Select manual extra...</option>' + _allExtras.map(e => `<option value="${e.id}" data-name="${e.name}">${e.name}</option>`).join('');
+    
     document.getElementById('recipe-amount').value = '';
     document.getElementById('ing-error').style.display = 'none';
+    document.getElementById('extra-error').style.display = 'none';
+    
     renderIngredientRows();
+    renderExtraRows();
     document.getElementById('modal-recipe').classList.add('open');
 }
-
 function renderIngredientRows() {
     const tbody = document.getElementById('ingredient-rows');
-    if (!_pendingIngredients.length) {
-        tbody.innerHTML = `<tr><td colspan="3" class="ing-empty">No ingredients yet — add one above.</td></tr>`;
-        return;
-    }
+    if (!_pendingIngredients.length) { tbody.innerHTML = `<tr><td colspan="3" class="ing-empty">No machine ingredients yet.</td></tr>`; return; }
     tbody.innerHTML = _pendingIngredients.map((ing, i) => `
-        <tr>
-            <td><strong>${ing.bottle_name}</strong></td>
-            <td>${ing.amount_ml} ml</td>
-            <td style="text-align:right">
-                <button class="btn danger" style="font-size:0.8rem;padding:6px 12px" onclick="removeIngredient(${i})">Remove</button>
-            </td>
-        </tr>`).join('');
+        <tr><td><strong>${ing.ingredient_name}</strong></td><td>${ing.amount_ml} ml</td>
+        <td style="text-align:right"><button class="btn danger" style="font-size:0.8rem;padding:6px 12px" onclick="removeIngredient(${i})">Remove</button></td></tr>`).join('');
 }
-
 function addIngredientRow() {
-    const errEl  = document.getElementById('ing-error');
-    const sel    = document.getElementById('recipe-bottle-select');
-    const amtEl  = document.getElementById('recipe-amount');
-    const bottleId   = parseInt(sel.value);
-    const bottleName = sel.options[sel.selectedIndex]?.dataset?.name ?? '';
-    const amount     = parseFloat(amtEl.value);
-
+    const sel = document.getElementById('recipe-ingredient-select');
+    const amtEl = document.getElementById('recipe-amount');
+    const errEl = document.getElementById('ing-error');
     errEl.style.display = 'none';
-    if (!bottleId)    { errEl.textContent = 'Please select a bottle.';           errEl.style.display = 'block'; return; }
-    if (!(amount > 0)){ errEl.textContent = 'Amount must be greater than 0.';    errEl.style.display = 'block'; return; }
-    if (_pendingIngredients.some(i => i.bottle_id === bottleId)) {
-        errEl.textContent = 'This bottle is already in the recipe.'; errEl.style.display = 'block'; return;
-    }
-
-    _pendingIngredients.push({ bottle_id: bottleId, bottle_name: bottleName, amount_ml: amount });
-    sel.value   = '';
-    amtEl.value = '';
+    const ingId = parseInt(sel.value);
+    const ingName = sel.options[sel.selectedIndex]?.dataset?.name;
+    const amount = parseFloat(amtEl.value);
+    if (!ingId) { errEl.textContent = 'Select ingredient'; errEl.style.display = 'block'; return; }
+    if (!(amount > 0)) { errEl.textContent = 'Invalid amount'; errEl.style.display = 'block'; return; }
+    if (_pendingIngredients.some(i => i.ingredient_id === ingId)) { errEl.textContent = 'Already in recipe'; errEl.style.display = 'block'; return; }
+    _pendingIngredients.push({ ingredient_id: ingId, ingredient_name: ingName, amount_ml: amount });
+    sel.value = ''; amtEl.value = '';
     renderIngredientRows();
 }
+function removeIngredient(index) { _pendingIngredients.splice(index, 1); renderIngredientRows(); }
 
-function removeIngredient(index) {
-    _pendingIngredients.splice(index, 1);
-    renderIngredientRows();
+function renderExtraRows() {
+    const tbody = document.getElementById('extra-rows');
+    if (!_pendingExtras.length) { tbody.innerHTML = `<tr><td colspan="2" class="ing-empty">No manual extras yet.</td></tr>`; return; }
+    tbody.innerHTML = _pendingExtras.map((ext, i) => `
+        <tr><td><strong>${ext.extra_name}</strong></td>
+        <td style="text-align:right"><button class="btn danger" style="font-size:0.8rem;padding:6px 12px" onclick="removeExtra(${i})">Remove</button></td></tr>`).join('');
 }
+function addExtraRow() {
+    const sel = document.getElementById('recipe-extra-select');
+    const errEl = document.getElementById('extra-error');
+    errEl.style.display = 'none';
+    const extraId = parseInt(sel.value);
+    const extraName = sel.options[sel.selectedIndex]?.dataset?.name;
+    if (!extraId) { errEl.textContent = 'Select manual extra'; errEl.style.display = 'block'; return; }
+    if (_pendingExtras.some(e => e.extra_id === extraId)) { errEl.textContent = 'Already added'; errEl.style.display = 'block'; return; }
+    _pendingExtras.push({ extra_id: extraId, extra_name: extraName });
+    sel.value = '';
+    renderExtraRows();
+}
+function removeExtra(index) { _pendingExtras.splice(index, 1); renderExtraRows(); }
 
 async function saveRecipe() {
-    const payload = _pendingIngredients.map(i => ({ bottle_id: i.bottle_id, amount_ml: i.amount_ml }));
-    await API(`/admin/recipes/${_recipeDrinkId}`, { method: 'POST', body: JSON.stringify(payload) });
-    closeModal('recipe');
-    // Refresh the drink list to update any counts
-    loadRecipes();
+    await API(`/admin/recipes/${_recipeDrinkId}`, { 
+        method: 'POST', 
+        body: JSON.stringify({ ingredients: _pendingIngredients, extras: _pendingExtras }) 
+    });
+    closeModal('recipe'); loadRecipes();
 }
 
-// ── Bottles ──────────────────────────────────────────────────
+// ── Bottles & Lines
 async function loadBottles() {
+    const lines = await API('/admin/lines');
+    document.querySelector('#lines-table tbody').innerHTML = lines.map(l => `
+        <tr>
+            <td>${l.id}</td><td><strong>${l.name}</strong></td>
+            <td>
+                <button class="btn primary" onclick='openModal("line",${JSON.stringify(l)})'>Edit</button>
+                <button class="btn danger" onclick="deleteLine(${l.id})">Delete</button>
+            </td>
+        </tr>`).join('');
+
     const data = await API('/admin/bottles');
     document.querySelector('#bottles-table tbody').innerHTML = data.map(b => {
         const pct = Math.min(100, Math.max(0, (b.current_ml / b.capacity_ml) * 100)) || 0;
         const barColor = pct > 20 ? '#10b981' : '#ef4444';
-        const stockHtml = `
-            <div style="font-size:0.8rem;margin-bottom:4px">${b.current_ml} / ${b.capacity_ml} ml</div>
-            <div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden">
-                <div style="height:100%;background:${barColor};width:${pct}%"></div>
-            </div>`;
-        return `
-        <tr>
-            <td>${b.id}</td>
-            <td><strong>${b.name}</strong></td>
-            <td>${b.position}</td>
-            <td>${b.flow_rate} ml/s</td>
-            <td style="width:150px">${stockHtml}</td>
-            <td><span class="badge ${b.enabled ? 'enabled' : 'disabled'}">${b.enabled ? 'Enabled' : 'Disabled'}</span></td>
+        return `<tr>
+            <td>${b.id}</td><td><strong>${b.line_name}</strong></td><td><strong>${b.ingredient_name || '—'}</strong></td><td>${b.flow_rate} ml/s</td>
+            <td style="width:150px">
+                <div style="font-size:0.8rem;margin-bottom:4px">${b.current_ml} / ${b.capacity_ml} ml</div>
+                <div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden"><div style="height:100%;background:${barColor};width:${pct}%"></div></div>
+            </td>
+            <td><span class="badge ${b.enabled ? 'active' : 'inactive'}">${b.enabled ? 'Enabled' : 'Disabled'}</span></td>
             <td>
                 <button class="btn ghost" onclick='openModal("refill",${JSON.stringify(b)})'>Refill</button>
                 <button class="btn primary" onclick='openModal("bottle",${JSON.stringify(b)})'>Edit</button>
-                <button class="btn danger"  onclick="deleteBottle(${b.id})">Delete</button>
+                <button class="btn danger" onclick="deleteBottle(${b.id})">Delete</button>
             </td>
         </tr>`;
     }).join('');
 }
+
+async function saveLine() {
+    const id = document.getElementById('line-id').value;
+    const body = { name: document.getElementById('line-name').value };
+    if (id) await API(`/admin/lines/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/lines', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('line'); loadBottles();
+}
+async function deleteLine(id) { if (confirm('Delete line? Make sure no bottles are using it.')) { await API(`/admin/lines/${id}`, {method:'DELETE'}); loadBottles(); } }
+
 async function saveBottle() {
-    const id   = document.getElementById('bottle-id').value;
-    const body = { 
-        name: document.getElementById('bottle-name').value, 
-        position: +document.getElementById('bottle-pos').value, 
-        flow_rate: +document.getElementById('bottle-flow').value, 
-        capacity_ml: +document.getElementById('bottle-capacity').value,
-        current_ml: +document.getElementById('bottle-current').value,
-        enabled: +document.getElementById('bottle-enabled').value 
-    };
-    if (id) await API(`/admin/bottles/${id}`, { method: 'PUT',  body: JSON.stringify(body) });
-    else    await API('/admin/bottles',         { method: 'POST', body: JSON.stringify(body) });
+    const id = document.getElementById('bottle-id').value;
+    const ingId = document.getElementById('bottle-ingredient').value;
+    const lineId = document.getElementById('bottle-line-id').value;
+    if (!lineId) return alert("Hardware Line is required");
+
+    const body = { ingredient_id: ingId ? +ingId : null, line_id: +lineId, flow_rate: +document.getElementById('bottle-flow').value, capacity_ml: +document.getElementById('bottle-capacity').value, current_ml: +document.getElementById('bottle-current').value, enabled: +document.getElementById('bottle-enabled').value };
+    if (id) await API(`/admin/bottles/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await API('/admin/bottles', { method: 'POST', body: JSON.stringify(body) });
     closeModal('bottle'); loadBottles();
 }
 async function submitRefill() {
     const id = document.getElementById('refill-bottle-id').value;
     const amount = +document.getElementById('refill-amount').value;
     await API(`/admin/bottles/${id}/refill`, { method: 'POST', body: JSON.stringify({ fill_to_ml: amount }) });
-    closeModal('refill');
-    loadBottles();
+    closeModal('refill'); loadBottles();
 }
-async function deleteBottle(id) {
-    if (!confirm('Delete this bottle?')) return;
-    await API(`/admin/bottles/${id}`, { method: 'DELETE' }); loadBottles();
-}
+async function deleteBottle(id) { if (confirm('Delete bottle?')) { await API(`/admin/bottles/${id}`, {method:'DELETE'}); loadBottles(); } }
 
-// ── Limits ───────────────────────────────────────────────────
-async function loadLimits() {
-    _allBottles = await API('/admin/bottles'); // refresh for modal dropdown
-    const data = await API('/admin/limits');
-    document.querySelector('#limits-table tbody').innerHTML = data.map(l => `
-        <tr><td>${l.id}</td><td>${l.bottle_name}</td><td>${l.min_ml} ml</td><td>${l.max_ml} ml</td></tr>`).join('');
-}
-async function saveLimit() {
-    const bottleId = +document.getElementById('limit-bottle-id').value;
-    if (!bottleId) { alert("Please select a bottle"); return; }
-    const body = { bottle_id: bottleId, min_ml: +document.getElementById('limit-min').value, max_ml: +document.getElementById('limit-max').value };
-    await API('/admin/limits', { method: 'POST', body: JSON.stringify(body) });
-    closeModal('limit'); loadLimits();
-}
-
-// ── Transactions ────────────────────────────────────────────────
+// ── Transactions & Status
 async function loadTransactions() {
     const data = await API('/admin/transactions');
-    document.querySelector('#transactions-table tbody').innerHTML = data.map(t => {
-        const time = new Date(t.started_at).toLocaleString();
-        const statusBadge = t.status === 'completed' ? 'active' : (t.status === 'failed' ? 'inactive' : 'ghost');
-        const ings = (t.ingredients || []).map(i => `${i.bottle_name}: ${i.amount_ml}ml`).join('<br>');
-        const totalMl = (t.ingredients || []).reduce((sum, i) => sum + i.amount_ml, 0);
-        const priceLabel = t.price != null ? `₹${t.price}` : '—';
-        return `
-        <tr>
-            <td>${t.id}</td>
-            <td>${time}</td>
-            <td><strong>${t.drink_name}</strong><br><span style="font-size:0.75rem;color:#6b7280">ID: ${t.drink_id}</span></td>
-            <td><strong>${priceLabel}</strong><br><span style="font-size:0.75rem;color:#6b7280">${totalMl} ml</span></td>
-            <td><span class="badge ${statusBadge}">${t.status}</span></td>
-            <td style="font-size:0.8rem;color:#4b5563">${ings || '-'}</td>
-        </tr>`;
-    }).join('');
+    document.querySelector('#transactions-table tbody').innerHTML = data.map(t => `
+        <tr><td>${t.id}</td><td>${new Date(t.timestamp).toLocaleString()}</td><td>${t.drink_id}</td><td>${t.drink_name}</td><td><span class="badge ${t.status==='completed'?'active':'inactive'}">${t.status}</span></td></tr>
+    `).join('');
 }
-
-// ── Status ───────────────────────────────────────────────────
 async function loadStatus() {
     const data = await API('/admin/status');
-    document.getElementById('s-device').textContent   = data.device;
+    document.getElementById('s-device').textContent = data.device;
     document.getElementById('s-sessions').textContent = data.active_sessions;
-    document.getElementById('s-time').textContent     = new Date(data.server_time).toLocaleString();
+    document.getElementById('s-time').textContent = new Date(data.server_time).toLocaleString();
 }
 
-// ── Logout ───────────────────────────────────────────────────
-async function doLogout() {
-    await API('/admin/logout', { method: 'POST' });
-    localStorage.removeItem('admin_token');
-    window.location.href = '/login';
-}
-
-// Boot
-loadDrinks();
+// Init
+loadCategoriesAndGroups();
 </script>
 </body>
 </html>

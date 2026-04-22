@@ -15,3 +15,7 @@ def get_recipes():
 def get_drinks():
     return db.get_all_drinks(device_online=mqtt.device_online)
 
+@router.get("/manual-extras/")
+def get_manual_extras():
+    return db.admin_get_extras()
+
