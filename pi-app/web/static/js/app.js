@@ -225,20 +225,49 @@ function attachSnapScrollListener() {
         });
     }, { passive: true });
 
-    // Custom JS Continuous Touch Scroll (Fallback for Kiosks)
-    let touchStartY = 0;
+    // Universal Pointer Drag Scroll (Fallback for Kiosks)
+    let isDragging = false;
+    let startY = 0;
+    let totalDrag = 0;
     
-    container.addEventListener('touchstart', (e) => {
-        if (!e.touches.length) return;
-        touchStartY = e.touches[0].clientY;
+    container.addEventListener('pointerdown', (e) => {
+        if (!e.isPrimary) return;
+        isDragging = true;
+        startY = e.clientY;
+        totalDrag = 0;
+        // Temporarily disable snap and smooth behavior so JS can seamlessly drag
+        container.style.scrollSnapType = 'none';
+        container.style.scrollBehavior = 'auto';
     }, { passive: true });
 
-    container.addEventListener('touchmove', (e) => {
-        if (!e.touches.length) return;
-        let currentY = e.touches[0].clientY;
-        container.scrollBy(0, touchStartY - currentY);
-        touchStartY = currentY;
+    container.addEventListener('pointermove', (e) => {
+        if (!isDragging || !e.isPrimary) return;
+        let currentY = e.clientY;
+        let delta = startY - currentY;
+        totalDrag += Math.abs(delta);
+        container.scrollBy(0, delta);
+        startY = currentY;
     }, { passive: true });
+
+    const stopDragging = (e) => {
+        if (!isDragging || !e.isPrimary) return;
+        isDragging = false;
+        // Restore snapping after finger lifts
+        container.style.scrollSnapType = 'y mandatory';
+        container.style.scrollBehavior = 'smooth';
+    };
+
+    container.addEventListener('pointerup', stopDragging, { passive: true });
+    container.addEventListener('pointerleave', stopDragging, { passive: true });
+    container.addEventListener('pointercancel', stopDragging, { passive: true });
+
+    // Prevent accidental clicks if the user was dragging
+    container.addEventListener('click', (e) => {
+        if (totalDrag > 10) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, { capture: true });
 
     container.dataset.listenerAttached = '1';
 }
