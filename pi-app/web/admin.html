@@ -7,8 +7,9 @@
     <style>
         /* ── Global ──────────────────────────────────────────────── */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f5f7fb; font-family: 'Inter', sans-serif; color: #111827; height: 100vh; overflow: hidden; }
-        .container { display: flex; height: 100vh; }
+        html, body { height: 100%; margin: 0; }
+        body { background: #f5f7fb; font-family: 'Inter', sans-serif; color: #111827; }
+        .container { display: flex; height: 100%; }
         .sidebar { width: 220px; background: #111827; color: white; height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-logo { font-size: 1.25rem; font-weight: 800; letter-spacing: 3px; color: #fff; margin-bottom: 32px; padding: 4px 8px; }
         .sidebar-section { font-size: 0.65rem; font-weight: 700; color: #4b5563; letter-spacing: 2px; text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; margin-top: 16px; }
@@ -18,11 +19,11 @@
         .sidebar-bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid #1f2937; }
         .sidebar-bottom a { color: #ef4444; }
         .sidebar-bottom a:hover { background: #1f2937; color: #f87171; }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .main { flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 30px; display: flex; justify-content: space-between; align-items: center; }
         .topbar-left h2 { font-size: 1.1rem; font-weight: 700; }
         .topbar-left p  { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
-        .content { flex: 1; padding: 28px 30px; overflow-y: auto; }
+        .content { flex: 1; padding: 28px 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -48,7 +49,7 @@
         .btn.danger:hover { background: #dc2626; }
         .btn.ghost { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
         .btn.ghost:hover { background: #e5e7eb; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.4); z-index: 300; align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.4); z-index: 300; align-items: center; justify-content: center; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 20px 0; }
         .modal-overlay.open { display: flex; }
         .modal { background: #fff; border-radius: 16px; padding: 32px; width: 460px; border: 1px solid #e5e7eb; box-shadow: 0 8px 40px rgba(0,0,0,0.12); position: relative; margin: auto; }
         .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 22px; }
@@ -239,7 +240,7 @@
                 </div>
                 <div class="card" style="margin-bottom: 32px;">
                     <table id="lines-table">
-                        <thead><tr><th>ID</th><th>Line Name (Relay)</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Line Name (Relay)</th><th>Calibration</th><th>Actions</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -431,6 +432,17 @@
         <h3 id="modal-line-title">Add Hardware Line</h3>
         <input type="hidden" id="line-id">
         <div class="form-group"><label>Line Name</label><input type="text" id="line-name" placeholder="e.g. R1"></div>
+        <div class="form-group"><label>Calibration Type</label>
+            <select id="line-calibration-type">
+                <option value="none">None</option>
+                <option value="percentage">Percentage</option>
+                <option value="volume">Volume</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Calibration Value</label>
+            <input type="number" id="line-calibration-value" placeholder="e.g. 5" step="0.1">
+            <p style="font-size: 0.75rem; color: #6b7280; margin-top: 6px;">Percentage: +5 = 5% extra | Volume: +10 = add 10 ml</p>
+        </div>
         <div class="modal-actions">
             <button class="btn ghost" onclick="closeModal('line')">Cancel</button>
             <button class="btn primary" onclick="saveLine()">Save</button>
@@ -607,6 +619,8 @@ async function openModal(type, data = null) {
     } else if (type === 'line') {
         document.getElementById('line-id').value = data?.id ?? '';
         document.getElementById('line-name').value = data?.name ?? '';
+        document.getElementById('line-calibration-type').value = data?.calibration_type ?? 'none';
+        document.getElementById('line-calibration-value').value = data?.calibration_value ?? 0;
         document.getElementById('modal-line-title').textContent = data ? 'Edit Line' : 'Add Line';
     } else if (type === 'drink') {
         document.getElementById('drink-edit-mode').value = data ? 'true' : 'false';
@@ -954,14 +968,21 @@ async function saveRecipe() {
 // ── Bottles & Lines
 async function loadBottles() {
     const lines = await API('/admin/lines');
-    document.querySelector('#lines-table tbody').innerHTML = lines.map(l => `
+    document.querySelector('#lines-table tbody').innerHTML = lines.map(l => {
+        let calibText = "None";
+        if (l.calibration_type === "percentage") calibText = l.calibration_value >= 0 ? `+${l.calibration_value}%` : `${l.calibration_value}%`;
+        else if (l.calibration_type === "volume") calibText = l.calibration_value >= 0 ? `+${l.calibration_value}ml` : `${l.calibration_value}ml`;
+        
+        return `
         <tr>
             <td>${l.id}</td><td><strong>${l.name}</strong></td>
+            <td><span style="font-size: 0.85rem; color: #4b5563; background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${calibText}</span></td>
             <td>
                 <button class="btn primary" onclick='openModal("line",${JSON.stringify(l)})'>Edit</button>
                 <button class="btn danger" onclick="deleteLine(${l.id})">Delete</button>
             </td>
-        </tr>`).join('');
+        </tr>`;
+    }).join('');
 
     const data = await API('/admin/bottles');
     document.querySelector('#bottles-table tbody').innerHTML = data.map(b => {
@@ -985,7 +1006,11 @@ async function loadBottles() {
 
 async function saveLine() {
     const id = document.getElementById('line-id').value;
-    const body = { name: document.getElementById('line-name').value };
+    const body = { 
+        name: document.getElementById('line-name').value,
+        calibration_type: document.getElementById('line-calibration-type').value,
+        calibration_value: parseFloat(document.getElementById('line-calibration-value').value) || 0
+    };
     if (id) await API(`/admin/lines/${id}`, { method: 'PUT', body: JSON.stringify(body) });
     else await API('/admin/lines', { method: 'POST', body: JSON.stringify(body) });
     closeModal('line'); loadBottles();
@@ -1027,6 +1052,10 @@ async function loadStatus() {
 
 // Init
 loadCategoriesAndGroups();
+
+// Prevent default passive touch issues
+document.addEventListener("touchstart", () => {}, { passive: true });
+document.addEventListener("touchmove", () => {}, { passive: true });
 </script>
 </body>
 </html>

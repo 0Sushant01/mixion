@@ -10,6 +10,17 @@ class PourService:
         duration = (amount_ml / flow_rate) + 0.3
         return round(duration, 2)
 
+    def apply_calibration(self, amount_ml: float, calibration_type: str, calibration_value: float) -> float:
+        if calibration_type == "percentage":
+            adjusted = amount_ml + (amount_ml * calibration_value / 100.0)
+        elif calibration_type == "volume":
+            adjusted = amount_ml + calibration_value
+        else:
+            adjusted = amount_ml
+
+        # Ensure final amount is never negative
+        return max(0.0, adjusted)
+
     def prepare_jobs(self, drink_id):
         bottles = self.db.get_recipe_bottles(drink_id)
         if not bottles:
@@ -19,7 +30,15 @@ class PourService:
         for b in bottles:
             if not b["enabled"]:
                 raise HTTPException(status_code=409, detail=f"Bottle '{b['name']}' is disabled")
-            duration = self.calculate_duration(b["amount_ml"], b["flow_rate"])
+            
+            # Apply hardware line calibration (percentage or volume)
+            calibrated_amount = self.apply_calibration(
+                amount_ml=b["amount_ml"],
+                calibration_type=b.get("calibration_type", "none"),
+                calibration_value=b.get("calibration_value", 0.0)
+            )
+
+            duration = self.calculate_duration(calibrated_amount, b["flow_rate"])
             jobs.append({"relay": b["line_name"], "duration_sec": duration})
         return jobs
 

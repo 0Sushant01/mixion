@@ -180,12 +180,21 @@ def get_lines():
 
 @router.post("/admin/lines", dependencies=[Depends(require_auth)])
 def add_line(data: dict):
-    rid = get_db().admin_add_line(data["name"])
+    rid = get_db().admin_add_line(
+        data["name"],
+        data.get("calibration_type", "none"),
+        float(data.get("calibration_value", 0.0))
+    )
     return {"id": rid}
 
 @router.put("/admin/lines/{lid}", dependencies=[Depends(require_auth)])
 def update_line(lid: int, data: dict):
-    get_db().admin_update_line(lid, data["name"])
+    get_db().admin_update_line(
+        lid,
+        data["name"],
+        data.get("calibration_type", "none"),
+        float(data.get("calibration_value", 0.0))
+    )
     return {"status": "updated"}
 
 @router.delete("/admin/lines/{lid}", dependencies=[Depends(require_auth)])

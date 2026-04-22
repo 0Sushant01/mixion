@@ -41,7 +41,9 @@ class Database:
 
             CREATE TABLE IF NOT EXISTS lines (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE NOT NULL
+                name TEXT UNIQUE NOT NULL,
+                calibration_type TEXT DEFAULT 'none',
+                calibration_value REAL DEFAULT 0.0
             );
 
             CREATE TABLE IF NOT EXISTS bottles (
@@ -265,7 +267,7 @@ class Database:
     def get_recipe_bottles(self, drink_id: str):
         c = self.conn.cursor()
         c.execute("""
-            SELECT b.id, i.name, l.name as line_name, b.flow_rate, b.enabled, r.amount_ml
+            SELECT b.id, i.name, l.name as line_name, b.flow_rate, b.enabled, r.amount_ml, l.calibration_type, l.calibration_value
             FROM recipes r
             JOIN ingredients i ON i.id = r.ingredient_id
             JOIN bottles b ON b.ingredient_id = i.id
@@ -484,15 +486,15 @@ class Database:
         c.execute("SELECT * FROM lines")
         return [dict(r) for r in c.fetchall()]
 
-    def admin_add_line(self, name):
+    def admin_add_line(self, name, calibration_type='none', calibration_value=0.0):
         c = self.conn.cursor()
-        c.execute("INSERT INTO lines (name) VALUES (?)", (name,))
+        c.execute("INSERT INTO lines (name, calibration_type, calibration_value) VALUES (?,?,?)", (name, calibration_type, calibration_value))
         self.conn.commit()
         return c.lastrowid
 
-    def admin_update_line(self, lid, name):
+    def admin_update_line(self, lid, name, calibration_type='none', calibration_value=0.0):
         c = self.conn.cursor()
-        c.execute("UPDATE lines SET name=? WHERE id=?", (name, lid))
+        c.execute("UPDATE lines SET name=?, calibration_type=?, calibration_value=? WHERE id=?", (name, calibration_type, calibration_value, lid))
         self.conn.commit()
 
     def admin_delete_line(self, lid):

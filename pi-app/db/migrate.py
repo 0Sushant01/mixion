@@ -126,12 +126,14 @@ MIGRATIONS = [
             "ALTER TABLE extras ADD COLUMN price REAL DEFAULT 0.0",
         ],
     ),
-    # ── Add future migrations below ──────────────────────────────────────────
-    # (
-    #     4,
-    #     "Description of change",
-    #     ["ALTER TABLE ...", "CREATE TABLE IF NOT EXISTS ..."],
-    # ),
+    (
+        4,
+        "Add calibration_type and calibration_value to hardware lines",
+        [
+            "ALTER TABLE lines ADD COLUMN calibration_type TEXT DEFAULT 'none'",
+            "ALTER TABLE lines ADD COLUMN calibration_value REAL DEFAULT 0.0"
+        ],
+    ),
 ]
 
 
@@ -199,7 +201,7 @@ REQUIRED_SCHEMA = {
     "ui_groups":        ["id", "category_id", "name"],
     "ingredient_types": ["id", "name"],
     "ingredients":      ["id", "name", "type_id", "enabled"],
-    "lines":            ["id", "name"],
+    "lines":            ["id", "name", "calibration_type", "calibration_value"],
     "bottles":          ["id", "ingredient_id", "line_id", "flow_rate", "capacity_ml", "current_ml", "enabled"],
     "glasses":          ["id", "name"],
     "methods":          ["id", "name"],
