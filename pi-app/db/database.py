@@ -115,13 +115,6 @@ class Database:
         """)
         self.conn.commit()
 
-        # Safe migration for extras price
-        try:
-            self.conn.execute("ALTER TABLE extras ADD COLUMN price REAL DEFAULT 0.0")
-            self.conn.commit()
-        except sqlite3.OperationalError:
-            pass # Column already exists
-
     # ── Core: Availability & Frontend ─────────────────────────────────────────
 
     def check_drink_availability(self, drink_id: str, device_online: bool = True) -> tuple[bool, str]:
