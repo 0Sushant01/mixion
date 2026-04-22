@@ -36,7 +36,6 @@
 html, body {
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
     font-family: 'Inter', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text-1);
@@ -617,6 +616,8 @@ html, body {
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
 }
 
 .menu-snap-container::-webkit-scrollbar {

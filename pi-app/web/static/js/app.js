@@ -225,22 +225,19 @@ function attachSnapScrollListener() {
         });
     }, { passive: true });
 
-    // Custom JS Swipe Detection for Kiosks where native touch scroll fails
+    // Custom JS Continuous Touch Scroll (Fallback for Kiosks)
     let touchStartY = 0;
+    
     container.addEventListener('touchstart', (e) => {
-        touchStartY = e.changedTouches[0].screenY;
+        if (!e.touches.length) return;
+        touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
-    container.addEventListener('touchend', (e) => {
-        const touchEndY = e.changedTouches[0].screenY;
-        const swipeDistance = touchStartY - touchEndY;
-        const threshold = 60; // minimum pixels to count as swipe
-
-        if (swipeDistance > threshold) {
-            scrollToPage(currentSnapPage + 1);
-        } else if (swipeDistance < -threshold) {
-            scrollToPage(currentSnapPage - 1);
-        }
+    container.addEventListener('touchmove', (e) => {
+        if (!e.touches.length) return;
+        let currentY = e.touches[0].clientY;
+        container.scrollBy(0, touchStartY - currentY);
+        touchStartY = currentY;
     }, { passive: true });
 
     container.dataset.listenerAttached = '1';
