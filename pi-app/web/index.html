@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f4f6fb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Mixion Kiosk</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=10">
+    <link rel="stylesheet" href="/static/css/style.css?v=11">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -34,12 +36,12 @@
                 <!-- Scrollable nav inside sidebar -->
                 <div class="sidebar-scroll">
                     <p class="nav-section-label">Category</p>
-                    <nav id="sidebar-categories"></nav>
+                    <nav id="sidebar-categories" aria-label="Category Navigation"></nav>
 
                     <div class="sidebar-divider"></div>
 
                     <p class="nav-section-label">Groups</p>
-                    <nav id="sidebar-groups"></nav>
+                    <nav id="sidebar-groups" aria-label="Group Navigation"></nav>
                 </div>
 
                 <div class="sidebar-footer">
@@ -87,29 +89,29 @@
     <!-- ══════════════════════════════════════════════
          EXTRAS & PAYMENT MODAL
     ══════════════════════════════════════════════  -->
-    <div id="payment-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 2rem; border-radius: 12px; color: black; text-align: left; max-width: 400px; width: 90%;">
-            <h2 style="margin-top: 0; text-align: center;">Select Extras (Optional)</h2>
-            <div id="extras-container" style="margin: 1.5rem 0; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+    <div id="payment-modal" class="payment-modal-overlay touch-manipulation" style="display: none;">
+        <div class="payment-modal-content">
+            <h2>Select Extras (Optional)</h2>
+            <div id="extras-container" class="payment-modal-extras">
                 <!-- Extras checkboxes injected here -->
             </div>
-            <hr style="border: none; border-top: 1px dashed #ccc; margin: 1rem 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 1.1rem;">
+            <hr class="payment-modal-divider">
+            <div class="payment-modal-row">
                 <span>Drink Price:</span>
                 <span id="modal-drink-price">₹0</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 1.1rem; color: #666;">
+            <div class="payment-modal-row text-muted">
                 <span>Extras Total:</span>
                 <span id="modal-extras-total">₹0</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; margin-top: 0.5rem;">
+            <div class="payment-modal-row total">
                 <span>TOTAL:</span>
                 <span id="modal-total-price">₹0</span>
             </div>
             
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                <button onclick="cancelPayment()" style="padding: 0.8rem 1.5rem; border: none; border-radius: 8px; background: #ccc; cursor: pointer; font-size: 1rem;">Cancel</button>
-                <button id="confirm-payment-btn" style="padding: 0.8rem 1.5rem; border: none; border-radius: 8px; background: #4caf50; color: white; cursor: pointer; font-size: 1rem; font-weight: bold;">Proceed to Payment</button>
+            <div class="payment-modal-actions">
+                <button class="btn-cancel" onclick="cancelPayment()">Cancel</button>
+                <button id="confirm-payment-btn" class="btn-confirm">Proceed to Payment</button>
             </div>
         </div>
     </div>

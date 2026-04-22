@@ -44,9 +44,25 @@ let mediaObserver;
 let scrollRafPending = false;
 
 function getPageSize() {
-    if (window.innerWidth <= 700) return 2;
-    if (window.innerWidth <= 1100) return 4;
-    return 6;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    
+    const availableH = h - 140;
+    let rows = Math.floor(availableH / 210);
+    if (rows < 1) rows = 1;
+
+    let cols = 1;
+    if (w > 1280) {
+        cols = Math.floor((w - 300) / 300);
+    } else if (w > 900) {
+        cols = Math.floor((w - 260) / 280);
+    } else if (w > 640) {
+        cols = Math.floor((w - 200) / 260);
+    }
+    
+    if (cols < 1) cols = 1;
+    
+    return cols * rows;
 }
 
 // ── Load Data ─────────────────────────────────────────────────────────────────

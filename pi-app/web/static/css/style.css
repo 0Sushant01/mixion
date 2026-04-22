@@ -23,7 +23,11 @@
     --radius-sm:    8px;
     --radius-md:    14px;
     --radius-lg:    20px;
-    --sidebar-w:    220px;
+    --sidebar-w:    clamp(60px, 18vw, 240px);
+    --topbar-h:     clamp(60px, 9vh, 100px);
+    --card-gap:     clamp(10px, 1.5vw, 20px);
+    --page-pad-x:   clamp(8px, 2.5vw, 28px);
+    --page-pad-top: calc(var(--topbar-h) + 12px);
     --ease:         0.22s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -84,7 +88,7 @@ html, body {
 }
 
 .splash-logo {
-    font-size: 5.5rem;
+    font-size: clamp(2.5rem, 10vw, 6rem);
     font-weight: 800;
     letter-spacing: 16px;
     color: #fff;
@@ -509,7 +513,7 @@ html, body {
     align-items: center;
     gap: 20px;
     background: var(--surface);
-    padding: 60px 80px;
+    padding: clamp(1.5rem, 6vw, 5rem) clamp(2rem, 5vw, 5rem);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
@@ -602,7 +606,7 @@ html, body {
     left: 0;
     right: 0;
     z-index: 20;
-    height: 94px;
+    height: var(--topbar-h);
     backdrop-filter: blur(8px);
 }
 
@@ -625,10 +629,11 @@ html, body {
 }
 
 .drink-page {
-    height: 100vh;
+    height: 100svh;
+    min-height: 100vh;
     scroll-snap-align: start;
     scroll-snap-stop: always;
-    padding: 106px 22px 18px;
+    padding: var(--page-pad-top) calc(var(--page-pad-x) + 30px) 18px var(--page-pad-x);
     display: flex;
     align-items: stretch;
 }
@@ -636,8 +641,8 @@ html, body {
 .drink-grid {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: var(--card-gap);
     align-content: start;
     min-height: 0;
 }
@@ -650,7 +655,7 @@ html, body {
     display: flex;
     align-items: stretch;
     gap: 14px;
-    min-height: 188px;
+    min-height: 194px;
     height: auto;
     max-width: 100%;
     overflow: hidden;
@@ -674,10 +679,9 @@ html, body {
 }
 
 .card-media {
-    width: 118px;
-    min-width: 118px;
-    height: 118px;
-    align-self: center;
+    width: min(30%, 130px);
+    min-width: 80px;
+    align-self: stretch;
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #c5d3ea;
@@ -685,6 +689,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
+    aspect-ratio: 1 / 1;
 }
 
 .card-media img,
@@ -728,7 +733,7 @@ html, body {
 }
 
 .top h3 {
-    font-size: 20px;
+    font-size: clamp(0.95rem, 1.8vw, 1.25rem);
     line-height: 1.08;
     color: #0f172a;
     font-weight: 800;
@@ -847,51 +852,226 @@ html, body {
     transform: scale(1.35);
 }
 
-@media (max-width: 900px) {
-    .sidebar {
-        width: 170px;
-        min-width: 170px;
-        max-width: 170px;
-    }
+/* ═══════════════════════════════════════════════════════════
+   MODAL & EXTRAS
+═══════════════════════════════════════════════════════════ */
+.touch-manipulation {
+    touch-action: manipulation;
+}
 
+.payment-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-modal-content {
+    background: white;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    border-radius: 12px;
+    color: black;
+    text-align: left;
+    max-width: 440px;
+    width: 92%;
+}
+
+.payment-modal-content h2 {
+    margin-top: 0;
+    text-align: center;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+}
+
+.payment-modal-extras {
+    margin: 1.5rem 0;
+    max-height: 40vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.payment-modal-divider {
+    border: none;
+    border-top: 1px dashed #ccc;
+    margin: 1rem 0;
+}
+
+.payment-modal-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.payment-modal-row.text-muted {
+    color: #666;
+}
+
+.payment-modal-row.total {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.payment-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #e2e8f0;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.btn-confirm {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #10b981;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.btn-confirm:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN (BREAKPOINTS)
+═══════════════════════════════════════════════════════════ */
+
+/* ≤ 480px (phone portrait) */
+@media (max-width: 480px) {
+    .sidebar {
+        width: 60px;
+        min-width: 60px;
+        max-width: 60px;
+    }
+    .sidebar-brand {
+        font-size: 0;
+        padding: 20px 0;
+        text-align: center;
+    }
+    .sidebar-brand::before {
+        content: '🍹';
+        font-size: 1.2rem;
+    }
+    .nav-section-label {
+        font-size: 0;
+        padding: 10px 0;
+        text-align: center;
+    }
+    .nav-section-label::before {
+        content: '•';
+        font-size: 1rem;
+    }
+    .nav-item {
+        font-size: 0;
+        padding: 12px 0;
+        text-align: center;
+    }
+    .nav-item::first-letter {
+        font-size: 1.2rem;
+    }
+    .sidebar-btn {
+        font-size: 0;
+        padding: 12px 0;
+    }
+    .sidebar-btn::before {
+        content: '🔑';
+        font-size: 1.2rem;
+    }
+    
+    .drink-grid {
+        grid-template-columns: 1fr;
+    }
     .drink-card {
         flex-direction: column;
-        gap: 10px;
-        min-height: 0;
     }
-
     .card-media {
         width: 100%;
-        min-width: 0;
-        height: 120px;
-        align-self: stretch;
+        max-width: 100%;
+        aspect-ratio: 3 / 2;
+        border-radius: 12px 12px 0 0;
+        border-bottom: none;
     }
+    .page-indicator {
+        display: none;
+    }
+}
 
-    .card-media img,
-    .card-media video {
+/* 481–640px (phone landscape / small tablet) */
+@media (min-width: 481px) and (max-width: 640px) {
+    .sidebar {
+        width: 140px;
+        min-width: 140px;
+        max-width: 140px;
+    }
+    .drink-grid {
+        grid-template-columns: 1fr;
+    }
+    .drink-card {
+        flex-direction: column;
+    }
+    .card-media {
         width: 100%;
-        height: 104px;
+        max-width: 100%;
+        aspect-ratio: 3 / 2;
+        border-radius: 12px 12px 0 0;
+        border-bottom: none;
     }
-
-    .top h3 {
-        font-size: 18px;
+    .page-indicator {
+        right: 4px;
     }
+}
 
+/* 641–900px (tablet portrait) */
+@media (min-width: 641px) and (max-width: 900px) {
+    .sidebar {
+        width: clamp(140px, 20vw, 180px);
+        min-width: clamp(140px, 20vw, 180px);
+        max-width: clamp(140px, 20vw, 180px);
+    }
+    .drink-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+}
+
+/* 901–1280px (desktop / landscape tablet) */
+@media (min-width: 901px) and (max-width: 1280px) {
+    .sidebar {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+    }
     .drink-grid {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
+}
 
-    .drink-page {
-        padding: 104px 14px 14px;
+/* 1281px+ (large desktop / kiosk / TV) */
+@media (min-width: 1281px) {
+    .sidebar {
+        width: 240px;
+        min-width: 240px;
+        max-width: 240px;
     }
-
-    .page-indicator {
-        right: 8px;
-        gap: 6px;
-    }
-
-    .page-dot {
-        width: 7px;
-        height: 7px;
+    .drink-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
