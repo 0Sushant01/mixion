@@ -43,3 +43,7 @@ def serve_login():
 def serve_admin_page():
     return FileResponse("web/admin.html")
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+

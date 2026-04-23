@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mixion-app:
+    build: ./pi-app
+    container_name: mixion_kiosk
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./pi-app/data:/app/data
+    env_file:
+      - ./pi-app/.env
+    restart: always
