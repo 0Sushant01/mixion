@@ -1,6 +1,6 @@
 {
     "use_real_mqtt": false,
-    "mqtt_broker": "192.168.1.67",
+    "mqtt_broker": "localhost",
     "mqtt_port": 1883,
     "device_id": "esp32_1"
 }
