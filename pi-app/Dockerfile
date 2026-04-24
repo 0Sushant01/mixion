@@ -1,16 +1,24 @@
 FROM python:3.11-slim
 
-# Set environment variables for production
+# -------------------------------
+# Environment
+# -------------------------------
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Create a non-root user
-RUN useradd -m -r appuser
+# -------------------------------
+# Create non-root user
+# -------------------------------
+RUN useradd -m -u 1000 appuser
 
+# -------------------------------
 # Set working directory
+# -------------------------------
 WORKDIR /app
 
-# Install system dependencies (including curl for healthcheck and gosu for permissions)
+# -------------------------------
+# Install system dependencies
+# -------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -18,29 +26,46 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gosu \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install dependencies
+# -------------------------------
+# Install Python dependencies
+# -------------------------------
 COPY requirements.txt .
 RUN pip install --upgrade pip --no-cache-dir \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy all project files into the container with correct ownership
-COPY --chown=appuser:appuser . .
+# -------------------------------
+# Copy project files
+# -------------------------------
+COPY . .
 
-# Ensure data directory exists
+# -------------------------------
+# Create data directory (will be overridden by volume)
+# -------------------------------
 RUN mkdir -p /app/data
 
-# Make the entrypoint executable
+# -------------------------------
+# Add entrypoint script
+# -------------------------------
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Expose the API port
+# -------------------------------
+# Expose port
+# -------------------------------
 EXPOSE 8000
 
-# Healthcheck to verify the FastAPI server is running
+# -------------------------------
+# Healthcheck
+# -------------------------------
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl --fail http://localhost:8000/health || exit 1
 
-# Set the entrypoint to handle permissions before dropping to appuser
+# -------------------------------
+# Entrypoint
+# -------------------------------
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-# Start by running migrations, then start the FastAPI server
+# -------------------------------
+# Start app
+# -------------------------------
 CMD ["sh", "-c", "python -m db.migrate && uvicorn api.app:app --host 0.0.0.0 --port 8000"]
