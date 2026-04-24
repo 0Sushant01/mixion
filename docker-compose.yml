@@ -1,13 +1,32 @@
-version: '3.8'
-
 services:
   mixion-app:
-    build: ./pi-app
+    build:
+      context: ./pi-app
+      dockerfile: Dockerfile
     container_name: mixion_kiosk
+
     ports:
-      - "8000:8000"
+      - "8005:8000"
+
     volumes:
       - ./pi-app/data:/app/data
+
     env_file:
       - ./pi-app/.env
+
     restart: always
+
+    # Ensure container starts as root (so entrypoint can fix permissions)
+    user: root
+
+    # Optional but useful
+    tty: true
+    stdin_open: true
+
+    # Healthcheck (matches your Dockerfile)
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

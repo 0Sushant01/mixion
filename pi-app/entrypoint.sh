@@ -1,9 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-# 1. Ensure the mounted volume is owned by the appuser
-# This fixes the SQLite "Permission Denied" errors when docker-compose mounts a root-owned directory.
-chown -R appuser:appuser /app/data
+echo "Fixing permissions for /app/data..."
 
-# 2. Drop privileges to appuser and execute the provided CMD
+# Ensure directory exists
+mkdir -p /app/data
+
+# Try to fix ownership (don't crash if it fails)
+chown -R appuser:appuser /app/data || echo "chown failed, continuing..."
+
+# Ensure write permissions (VERY IMPORTANT for SQLite)
+chmod -R 775 /app/data || echo "chmod failed, continuing..."
+
+echo "Permissions after fix:"
+ls -ld /app/data
+
+echo "Starting app as appuser..."
+
 exec gosu appuser "$@"
