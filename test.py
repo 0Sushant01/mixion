@@ -165,21 +165,35 @@ def send(data):
 def read_serial():
     global running
 
+    buffer = ""
+
     while running:
         try:
-            line = ser.readline().decode().strip()
-            if not line:
+            data = ser.read(ser.in_waiting or 1).decode(errors='ignore')
+
+            if not data:
                 continue
 
-            log("ESP → PI : " + line, "RX")
+            buffer += data
 
-            try:
-                data = json.loads(line)
-                handle_response(data)
-            except:
-                log("Invalid JSON", "ERR")
+            # Process complete lines
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                line = line.strip()
 
-        except:
+                if not line:
+                    continue
+
+                log("ESP → PI : " + line, "RX")
+
+                try:
+                    parsed = json.loads(line)
+                    handle_response(parsed)
+                except Exception as e:
+                    log(f"JSON ERROR → {line}", "ERR")
+
+        except Exception as e:
+            log(f"READ ERROR: {e}", "ERR")
             break
 
 # ---------------- HANDSHAKE ----------------
