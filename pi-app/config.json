@@ -1,6 +1,6 @@
 {
-    "use_real_mqtt": true,
-    "mqtt_broker": "192.168.1.67",
-    "mqtt_port": 1883,
+    "use_mock_serial": false,
+    "serial_port": "/dev/ttyUSB0",
+    "serial_baudrate": 115200,
     "device_id": "esp32_1"
 }

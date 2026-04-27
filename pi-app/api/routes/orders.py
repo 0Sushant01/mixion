@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from services.pour_service import PourService
 from db.database import Database
-from mqtt.mqtt_client import MQTTClient
+from hardware.serial_client import SerialClient
 
 router = APIRouter()
 
 db = Database()
-mqtt = MQTTClient()
-pour_service = PourService(db, mqtt)
+serial = SerialClient()
+pour_service = PourService(db, serial)
 
 @router.post("/order")
 def create_order(data: dict):

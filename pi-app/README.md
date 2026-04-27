@@ -42,20 +42,18 @@ The Admin Dashboard enables you to:
 
 The system automatically manages **Drink Availability**. If an ingredient drops below the required amount, or if the hardware goes offline, the drink is automatically marked as "⚠️ Out of Stock" on the kiosk frontend.
 
-## 📡 MQTT Configuration
+## 📡 Serial Configuration
 
-The system uses MQTT to communicate with the hardware (e.g., an ESP32 or Arduino). 
-Configuration is handled in `pi-app/config.json`:
+The `config.json` file configures the connection between the Pi and the ESP32:
 
 ```json
 {
-    "use_real_mqtt": true,
-    "mqtt_broker": "localhost",
-    "mqtt_port": 1883,
-    "mqtt_topic": "mixion/dispense",
-    "mqtt_status_topic": "mixion/status"
+    "use_mock_serial": false,
+    "serial_port": "/dev/ttyUSB0",
+    "serial_baudrate": 115200,
+    "device_id": "esp32_1"
 }
 ```
 
-- If `use_real_mqtt` is `false`, the system runs in Mock mode (printing commands to the console).
-- If the ESP unexpectedly disconnects, the system expects an `offline` message on the `mixion/status` topic (via Last Will and Testament), which will automatically disable all drinks on the kiosk.
+- If `use_mock_serial` is `true`, the system runs in Mock mode (simulating responses back to the server without needing actual hardware).
+- If the ESP unexpectedly disconnects, the system expects an `offline` message on the status connection, which will automatically disable all drinks on the kiosk.

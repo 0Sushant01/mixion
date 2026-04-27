@@ -2,9 +2,9 @@ import uuid
 from fastapi import HTTPException
 
 class PourService:
-    def __init__(self, db, mqtt):
+    def __init__(self, db, serial_client):
         self.db = db
-        self.mqtt = mqtt
+        self.serial = serial_client
 
     def calculate_duration(self, amount_ml, flow_rate):
         duration = (amount_ml / flow_rate) + 0.3
@@ -39,12 +39,12 @@ class PourService:
             )
 
             duration = self.calculate_duration(calibrated_amount, b["flow_rate"])
-            jobs.append({"relay": b["line_name"], "duration_sec": duration})
+            jobs.append({"relay": b["line_name"], "duration": duration})
         return jobs
 
     def dispense(self, drink_id):
         # 1. Pre-flight availability check
-        available, reason = self.db.check_drink_availability(drink_id, device_online=self.mqtt.device_online)
+        available, reason = self.db.check_drink_availability(drink_id, device_online=self.serial.device_online)
         if not available:
             raise HTTPException(status_code=409, detail=f"Drink unavailable: {reason}")
 
@@ -57,11 +57,11 @@ class PourService:
 
         # 5. Publish to hardware
         payload = {
-            "cmd": "dispense_parallel",
-            "jobs": jobs,
-            "msg_id": msg_id
+            "type": "CMD",
+            "msg_id": msg_id,
+            "jobs": jobs
         }
-        self.mqtt.publish(payload)
+        self.serial.send(payload)
 
         # 6. Deduct inventory immediately (optimistic — hardware is fire-and-forget)
         try:

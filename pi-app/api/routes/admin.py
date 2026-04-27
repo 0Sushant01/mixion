@@ -283,10 +283,10 @@ def get_transactions(limit: int = 100):
 @router.get("/admin/status", dependencies=[Depends(require_auth)])
 def get_status():
     import datetime
-    from mqtt.mqtt_client import MQTTClient
-    mqtt = MQTTClient()
+    from hardware.serial_client import SerialClient
+    serial = SerialClient()
     return {
-        "device": "online" if mqtt.device_online else "offline",
+        "device": "online" if serial.device_online else "offline",
         "server_time": datetime.datetime.now().isoformat(),
         "active_sessions": len(_active_tokens)
     }
