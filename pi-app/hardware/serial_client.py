@@ -93,6 +93,7 @@ class SerialClient:
                         print(f"🔌 Serial Reconnected to {self.serial_port}")
                         time.sleep(2) # ESP RESET FIX
                     except Exception as e:
+                        print(f"⏳ Waiting for Serial port ({e})...")
                         time.sleep(2)
                         continue
                     
