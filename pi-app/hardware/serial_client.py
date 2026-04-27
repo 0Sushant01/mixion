@@ -26,8 +26,8 @@ class SerialClient:
         
         # Heartbeat tracking
         self.last_heartbeat = time.time()
-        self.heartbeat_timeout_sec = 25.0 # Allow 2 missed 12-sec heartbeats
-        self.polling_interval_sec = 2.0
+        self.heartbeat_timeout_sec = 13.5
+        self.polling_interval_sec = 0.5
 
         # Load configuration
         config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
