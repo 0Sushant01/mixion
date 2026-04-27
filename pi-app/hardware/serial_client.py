@@ -77,10 +77,6 @@ class SerialClient:
                 if self.device_online:
                     print("⚠️ ESP32 Heartbeat timeout. Marking device OFFLINE.")
                     self.device_online = False
-            else:
-                if not self.device_online:
-                    print("✅ ESP32 Heartbeat received. Marking device ONLINE.")
-                    self.device_online = True
             
             time.sleep(self.polling_interval_sec)
 
@@ -119,6 +115,11 @@ class SerialClient:
                 break
                 
     def _handle_response(self, resp):
+        self.last_heartbeat = time.time()
+        if not self.device_online:
+            print("✅ ESP32 Activity received. Marking device ONLINE.")
+            self.device_online = True
+
         rtype = resp.get("type")
 
         if rtype == "ACK":
@@ -156,7 +157,6 @@ class SerialClient:
 
         elif rtype == "LIVE":
             print("HEARTBEAT")
-            self.last_heartbeat = time.time()
 
     def send(self, payload):
         """Used internally for handshake responses or directly by external services for CMD."""
