@@ -39,9 +39,14 @@ def connect():
     global ser, running
     try:
         ser = serial.Serial(port_var.get(), 115200, timeout=1)
+
+        time.sleep(2)  # 🔥 ESP RESET FIX
+
         running = True
         threading.Thread(target=read_serial, daemon=True).start()
+
         log(f"Connected to {port_var.get()}", "INFO")
+
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -55,12 +60,11 @@ def disconnect():
 tk.Button(root, text="Connect", command=connect).pack()
 tk.Button(root, text="Disconnect", command=disconnect).pack()
 
-# ---------------- LOG BOX ----------------
+# ---------------- LOG ----------------
 
 log_box = tk.Text(root, height=18)
 log_box.pack(fill="both", padx=10, pady=10)
 
-# Colors
 log_box.tag_config("TX", foreground="blue")
 log_box.tag_config("RX", foreground="green")
 log_box.tag_config("ERR", foreground="red")
@@ -140,12 +144,21 @@ def send_cmd():
 
 tk.Button(root, text="Send CMD", command=send_cmd).pack(pady=10)
 
+# ---------------- TEST BUTTON ----------------
+
+def test_status():
+    send({"type": "STATUS", "msg_id": "test"})
+
+tk.Button(root, text="Test STATUS", command=test_status).pack()
+
 # ---------------- SERIAL SEND ----------------
 
 def send(data):
     msg = json.dumps(data)
     log("PI → ESP : " + msg, "TX")
-    ser.write((msg + "\n").encode())
+
+    ser.write((msg + "\n").encode("utf-8"))
+    ser.flush()   # 🔥 FIX
 
 # ---------------- SERIAL READ ----------------
 
@@ -164,7 +177,7 @@ def read_serial():
                 data = json.loads(line)
                 handle_response(data)
             except:
-                log("Invalid JSON from ESP", "ERR")
+                log("Invalid JSON", "ERR")
 
         except:
             break
@@ -202,16 +215,10 @@ def handle_response(resp):
         log("DONE", "INFO")
 
     elif rtype == "DISCARDED":
-        log("DISCARDED (timeout)", "ERR")
+        log("DISCARDED", "ERR")
 
     elif rtype == "ERROR":
         log(f"ERROR: {resp.get('reason')}", "ERR")
-
-    elif rtype == "IN_PROGRESS":
-        log("IN PROGRESS", "INFO")
-
-    elif rtype == "WAITING_VERIFIED":
-        log("WAITING VERIFIED", "INFO")
 
     elif rtype == "LIVE":
         log("HEARTBEAT", "INFO")
