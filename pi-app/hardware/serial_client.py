@@ -47,28 +47,21 @@ class SerialClient:
         else:
             try:
                 import serial
-                self.ser = serial.Serial(self.serial_port, self.serial_baudrate, timeout=1)
-                time.sleep(2) # ESP RESET FIX
-                
-                self.running = True
-                
-                # Start serial read loop
-                self.read_thread = threading.Thread(target=self._read_serial_loop, daemon=True)
-                self.read_thread.start()
-                
-                # Start heartbeat loop
-                self.heartbeat_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
-                self.heartbeat_thread.start()
-                
-                print(f"🔧 Real Serial Client Initialized (Port: {self.serial_port}@{self.serial_baudrate})")
-                
+                print(f"🔧 Real Serial Client Ready (Port: {self.serial_port}@{self.serial_baudrate})")
             except ImportError:
                 print("❌ pyserial not installed. Run: pip install pyserial")
                 self.use_mock_serial = True
                 self.device_online = True
-            except Exception as e:
-                print(f"❌ Failed to connect to Serial port: {e}")
-                self.device_online = False
+
+        self.running = True
+        
+        # Start serial read loop
+        self.read_thread = threading.Thread(target=self._read_serial_loop, daemon=True)
+        self.read_thread.start()
+        
+        # Start heartbeat loop
+        self.heartbeat_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self.heartbeat_thread.start()
 
     def _heartbeat_loop(self):
         while self.running:
@@ -83,9 +76,25 @@ class SerialClient:
     def _read_serial_loop(self):
         buffer = ""
         while self.running:
+            if self.use_mock_serial:
+                time.sleep(1)
+                continue
+                
             try:
                 if not self.ser or not self.ser.is_open:
-                    break
+                    import serial
+                    try:
+                        if self.ser:
+                            self.ser.close()
+                    except: pass
+                    
+                    try:
+                        self.ser = serial.Serial(self.serial_port, self.serial_baudrate, timeout=1)
+                        print(f"🔌 Serial Reconnected to {self.serial_port}")
+                        time.sleep(2) # ESP RESET FIX
+                    except Exception as e:
+                        time.sleep(2)
+                        continue
                     
                 data = self.ser.read(self.ser.in_waiting or 1).decode(errors='ignore')
                 
@@ -124,7 +133,13 @@ class SerialClient:
 
             except Exception as e:
                 print(f"READ ERROR: {e}")
-                break
+                self.device_online = False
+                try:
+                    if self.ser:
+                        self.ser.close()
+                except: pass
+                self.ser = None
+                time.sleep(2)
                 
     def _handle_response(self, resp):
         self.last_heartbeat = time.time()
