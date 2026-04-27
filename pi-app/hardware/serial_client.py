@@ -90,6 +90,8 @@ class SerialClient:
                     
                     try:
                         self.ser = serial.Serial(self.serial_port, self.serial_baudrate, timeout=1)
+                        self.ser.dtr = False
+                        self.ser.rts = False
                         print(f"🔌 Serial Reconnected to {self.serial_port}")
                         time.sleep(2) # ESP RESET FIX
                     except Exception as e:
