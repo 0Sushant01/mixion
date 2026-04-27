@@ -104,6 +104,18 @@ class SerialClient:
 
                     print("ESP → PI : " + line)
 
+                    # --- Auto-fix malformed JSON from ESP ---
+                    # Extract JSON object if there's garbage around it
+                    start_idx = line.find('{')
+                    end_idx = line.rfind('}')
+                    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                        line = line[start_idx:end_idx+1]
+                    
+                    # Fix unquoted keys (e.g., {type:"LIVE"} -> {"type":"LIVE"})
+                    import re
+                    line = re.sub(r'([{,])\s*([a-zA-Z0-9_]+)\s*:', r'\1"\2":', line)
+                    # ----------------------------------------
+
                     try:
                         parsed = json.loads(line)
                         self._handle_response(parsed)
