@@ -24,6 +24,7 @@ msg_id = 1
 current_cmd = None
 
 jobs = []
+active_jobs = []
 
 run_state = {
     "running": False,
@@ -32,6 +33,8 @@ run_state = {
     "step_started": None,
     "planned_total": 0,
 }
+
+json_decoder = json.JSONDecoder()
 
 
 # ================= UI =================
@@ -215,12 +218,13 @@ def send(data):
 
     msg = json.dumps(data)
     log("PI -> ESP : " + msg, "TX")
-    ser.write((msg + "\n").encode("utf-8"))
+    # Use CRLF framing for better compatibility with microcontroller line readers.
+    ser.write((msg + "\r\n").encode("utf-8"))
     ser.flush()
 
 
 def send_cmd():
-    global msg_id, current_cmd
+    global msg_id, current_cmd, active_jobs
 
     if not ser or not ser.is_open:
         messagebox.showerror("Error", "Not connected")
@@ -233,9 +237,13 @@ def send_cmd():
     payload_jobs = build_payload_jobs()
     cmd = {"type": "CMD", "msg_id": str(msg_id), "jobs": payload_jobs}
     current_cmd = cmd
+    active_jobs = [j.copy() for j in jobs]
 
     run_state["planned_total"] = sum(j["duration"] for j in jobs)
     send(cmd)
+    jobs.clear()
+    refresh_jobs_view()
+    log("Queued jobs sent and cleared", "INFO")
     msg_id += 1
 
 
@@ -265,8 +273,8 @@ def start_run_tracking():
     run_state["step_started"] = time.monotonic()
     set_run_state("RUNNING")
 
-    if jobs:
-        current = jobs[0]
+    if active_jobs:
+        current = active_jobs[0]
         status_relay_var.set(f"Relay {current['relay']} (planned {current['duration']}s)")
     else:
         status_relay_var.set("-")
@@ -275,19 +283,22 @@ def start_run_tracking():
 
 
 def stop_run_tracking(final_state):
+    global active_jobs
+
     run_state["running"] = False
     run_state["job_index"] = -1
     run_state["step_started"] = None
+    active_jobs = []
     set_run_state(final_state)
 
 
 def check_step_duration(step_idx, actual_seconds, relay_from_resp=None):
-    if step_idx < 0 or step_idx >= len(jobs):
+    if step_idx < 0 or step_idx >= len(active_jobs):
         log("STEP_DONE received but step index is out of range", "ERR")
         return
 
-    expected = jobs[step_idx]["duration"]
-    expected_relay = jobs[step_idx]["relay"]
+    expected = active_jobs[step_idx]["duration"]
+    expected_relay = active_jobs[step_idx]["relay"]
     delta = actual_seconds - expected
 
     if relay_from_resp is not None and relay_from_resp != expected_relay:
@@ -349,8 +360,8 @@ def handle_response(resp):
         run_state["job_index"] += 1
         run_state["step_started"] = now
 
-        if 0 <= run_state["job_index"] < len(jobs):
-            next_job = jobs[run_state["job_index"]]
+        if 0 <= run_state["job_index"] < len(active_jobs):
+            next_job = active_jobs[run_state["job_index"]]
             status_relay_var.set(
                 f"Relay {next_job['relay']} (planned {next_job['duration']}s)"
             )
@@ -379,26 +390,48 @@ def read_serial():
     buffer = ""
     while running:
         try:
-            data = ser.read(ser.in_waiting or 1).decode(errors="ignore")
+            data = ser.read(ser.in_waiting or 1).decode("utf-8", errors="ignore")
             if not data:
                 continue
 
-            buffer += data
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if not line:
-                    continue
+            # Normalize carriage returns because many serial devices emit \r or \r\n.
+            buffer += data.replace("\r", "\n")
 
-                log("ESP -> PI : " + line, "RX")
-                try:
-                    parsed = json.loads(line)
-                    handle_response(parsed)
-                except Exception:
-                    log(f"JSON ERROR -> {line}", "ERR")
+            messages, buffer = extract_json_messages(buffer)
+            for parsed in messages:
+                log("ESP -> PI : " + json.dumps(parsed, separators=(",", ":")), "RX")
+                handle_response(parsed)
+
+            # Keep buffer bounded if serial stream contains garbage/noise.
+            if len(buffer) > 2048:
+                buffer = buffer[-1024:]
         except Exception as exc:
             log(f"READ ERROR: {exc}", "ERR")
             break
+
+
+def extract_json_messages(stream_buffer):
+    messages = []
+    idx = 0
+    size = len(stream_buffer)
+
+    while idx < size:
+        while idx < size and stream_buffer[idx] not in "[{":
+            idx += 1
+
+        if idx >= size:
+            return messages, ""
+
+        try:
+            obj, end = json_decoder.raw_decode(stream_buffer, idx)
+        except json.JSONDecodeError:
+            # Incomplete JSON: keep from first possible JSON char for next serial chunk.
+            return messages, stream_buffer[idx:]
+
+        messages.append(obj)
+        idx = end
+
+    return messages, ""
 
 
 # ================= LAYOUT =================
