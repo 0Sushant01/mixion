@@ -107,11 +107,9 @@ def serial_reader_thread():
                     except queue.Full:
                         pass  # Drop if queue full
                 except json.JSONDecodeError:
-                    # Log corrupt but don't crash
-                    try:
-                        rx_queue.put_nowait({"_error": "JSON_DECODE", "_raw": line[:100]})
-                    except queue.Full:
-                        pass
+                        # Log corrupt but don't crash - provide more detail
+                        log(f"JSON parse error: {line[:80]}", "ERR")
+                        continue
         
         except Exception as e:
             log(f"Serial read exception: {e}", "ERR")
@@ -124,15 +122,14 @@ def process_rx_messages():
         try:
             msg = rx_queue.get_nowait()
             
-            if "_error" in msg:
-                log(f"RX ERROR: {msg['_error']} - {msg.get('_raw', '')[:50]}", "ERR")
-                continue
-            
             # Log the message
             log("ESP -> PI : " + json.dumps(msg, separators=(",", ":")), "RX")
             
             # Handle by type
-            handle_esp_response(msg)
+            try:
+                handle_esp_response(msg)
+            except Exception as e:
+                log(f"Error handling response: {e}", "ERR")
         
         except queue.Empty:
             break
@@ -147,12 +144,16 @@ def handle_esp_response(resp):
     # ========== ACK ==========
     if msg_type == "ACK":
         if state["pi_state"] != "CMD_SENT":
-            log("ACK received in wrong state", "ERR")
+            log(f"ACK in state {state['pi_state']}, ignoring", "ERR")
+            return
+        
+        if not current_cmd:
+            log("ACK received but no CMD in progress", "ERR")
             return
         
         # Verify jobs match
         if resp.get("jobs") != current_cmd["jobs"]:
-            log("ACK jobs mismatch", "ERR")
+            log(f"ACK mismatch: got {resp.get('jobs')} vs {current_cmd['jobs']}", "ERR")
             return
         
         log("ACK valid, sending VERIFIED", "INFO")
@@ -165,7 +166,11 @@ def handle_esp_response(resp):
             "msg_id": current_cmd["msg_id"],
             "jobs": current_cmd["jobs"],
         }
-        send_to_esp(verified)
+        if send_to_esp(verified):
+            log("VERIFIED sent successfully", "INFO")
+        else:
+            log("Failed to send VERIFIED", "ERR")
+            state["pi_state"] = "IDLE"
     
     # ========== STARTED ==========
     elif msg_type == "STARTED":
@@ -266,7 +271,7 @@ def handle_esp_response(resp):
 def send_to_esp(cmd):
     """Send JSON command to ESP with strict \\n framing."""
     if not ser or not ser.is_open:
-        messagebox.showerror("Error", "Not connected to device")
+        log("Serial port not open", "ERR")
         return False
     
     try:
@@ -275,6 +280,7 @@ def send_to_esp(cmd):
         ser.write((msg + "\n").encode("utf-8"))
         ser.flush()
         return True
+        log(f"Send error: {e}", "ERR")
     except Exception as e:
         log(f"Send failed: {e}", "ERR")
         return False
@@ -328,6 +334,16 @@ def monitor_heartbeat():
     """Check if heartbeat is being received."""
     now = time.time()
     since_hb = now - state["last_heartbeat"]
+    
+    # Check for CMD timeout (VERIFIED not received within 5s)
+    if state["pi_state"] == "CMD_SENT":
+        elapsed = now - state.get("cmd_sent_time", now)
+        if elapsed > 5.5:
+            log(f"VERIFIED timeout ({elapsed:.1f}s) - ESP discarded CMD", "ERR")
+            state["pi_state"] = "IDLE"
+            state["esp_state"] = "IDLE"
+            messagebox.showerror("Timeout", "ESP didn't respond to VERIFIED - command failed")
+            return
     
     # If connected and no heartbeat for 20s, send STATUS probe
     if ser and ser.is_open and since_hb > 20:
@@ -491,17 +507,21 @@ def send_cmd():
     state["pi_state"] = "CMD_SENT"
     state["esp_state"] = "WAITING_VERIFIED"
     state["cmd_sent_time"] = time.time()
+    state["relays_done"] = set()
     
     set_run_state("CMD_SENT", "WAITING_VERIFIED")
+    status_relay_var.set("Sending command...")
     
     if send_to_esp(cmd):
+        log(f"CMD {msg_id} sent to ESP (relay count: {len(payload)})", "INFO")
         jobs.clear()
         refresh_jobs_view()
-        status_relay_var.set("Waiting for ACK...")
-        log("CMD sent, clearing queue", "INFO")
+        status_relay_var.set(f"Waiting for ACK (timeout in 5s)...")
         msg_id += 1
     else:
+        log("Failed to send CMD", "ERR")
         state["pi_state"] = "IDLE"
+        messagebox.showerror("Error", "Failed to send command")
 
 
 # ================= MAIN LOOP =================
