@@ -28,10 +28,9 @@ active_jobs = []
 
 run_state = {
     "running": False,
-    "job_index": -1,
     "run_started": None,
-    "step_started": None,
     "planned_total": 0,
+    "relays_done": set(),  # Track which relays have finished (ESP runs all in parallel)
 }
 
 json_decoder = json.JSONDecoder()
@@ -218,8 +217,8 @@ def send(data):
 
     msg = json.dumps(data)
     log("PI -> ESP : " + msg, "TX")
-    # Use CRLF framing for better compatibility with microcontroller line readers.
-    ser.write((msg + "\r\n").encode("utf-8"))
+    # ESP code only strips \n, not \r\n; send just \n to avoid JSON parse errors.
+    ser.write((msg + "\n").encode("utf-8"))
     ser.flush()
 
 
@@ -268,17 +267,10 @@ def update_runtime_ui():
 
 def start_run_tracking():
     run_state["running"] = True
-    run_state["job_index"] = 0
     run_state["run_started"] = time.monotonic()
-    run_state["step_started"] = time.monotonic()
+    run_state["relays_done"] = set()
     set_run_state("RUNNING")
-
-    if active_jobs:
-        current = active_jobs[0]
-        status_relay_var.set(f"Relay {current['relay']} (planned {current['duration']}s)")
-    else:
-        status_relay_var.set("-")
-
+    status_relay_var.set("All relays active (parallel execution)")
     update_runtime_ui()
 
 
@@ -286,39 +278,37 @@ def stop_run_tracking(final_state):
     global active_jobs
 
     run_state["running"] = False
-    run_state["job_index"] = -1
-    run_state["step_started"] = None
+    run_state["relays_done"] = set()
     active_jobs = []
     set_run_state(final_state)
 
 
-def check_step_duration(step_idx, actual_seconds, relay_from_resp=None):
-    if step_idx < 0 or step_idx >= len(active_jobs):
-        log("STEP_DONE received but step index is out of range", "ERR")
+def check_relay_duration(relay_num, actual_seconds):
+    """Check duration for a specific relay that just finished.
+    Since ESP runs all relays in parallel, we need to find the job with this relay.
+    """
+    job = None
+    for j in active_jobs:
+        if j["relay"] == relay_num:
+            job = j
+            break
+
+    if job is None:
+        log(f"STEP_DONE relay={relay_num} but not in active jobs", "ERR")
         return
 
-    expected = active_jobs[step_idx]["duration"]
-    expected_relay = active_jobs[step_idx]["relay"]
+    expected = job["duration"]
     delta = actual_seconds - expected
-
-    if relay_from_resp is not None and relay_from_resp != expected_relay:
-        log(
-            (
-                f"Relay mismatch: expected relay {expected_relay}, "
-                f"got relay {relay_from_resp}"
-            ),
-            "ERR",
-        )
 
     if abs(delta) <= 1:
         log(
-            f"Relay {expected_relay} duration OK: expected {expected}s, actual {actual_seconds}s",
+            f"Relay {relay_num} duration OK: expected {expected}s, actual {actual_seconds}s",
             "INFO",
         )
     else:
         log(
             (
-                f"Relay {expected_relay} duration drift: expected {expected}s, "
+                f"Relay {relay_num} duration drift: expected {expected}s, "
                 f"actual {actual_seconds}s, delta {delta:+d}s"
             ),
             "ERR",
@@ -352,21 +342,19 @@ def handle_response(resp):
         relay_done = resp.get("relay")
         log(f"STEP_DONE relay={relay_done}", "INFO")
 
+        if not run_state["running"]:
+            log(f"STEP_DONE received but not running", "ERR")
+            return
+
+        # Calculate actual duration for this specific relay (parallel execution).
         now = time.monotonic()
-        if run_state["step_started"] is not None and run_state["job_index"] >= 0:
-            actual_step_seconds = int(now - run_state["step_started"])
-            check_step_duration(run_state["job_index"], actual_step_seconds, relay_done)
+        if run_state["run_started"] is not None:
+            actual_relay_seconds = int(now - run_state["run_started"])
+            check_relay_duration(relay_done, actual_relay_seconds)
 
-        run_state["job_index"] += 1
-        run_state["step_started"] = now
-
-        if 0 <= run_state["job_index"] < len(active_jobs):
-            next_job = active_jobs[run_state["job_index"]]
-            status_relay_var.set(
-                f"Relay {next_job['relay']} (planned {next_job['duration']}s)"
-            )
-        else:
-            status_relay_var.set("Waiting for DONE")
+        run_state["relays_done"].add(relay_done)
+        remaining = len(active_jobs) - len(run_state["relays_done"])
+        status_relay_var.set(f"Relay {relay_done} done, {remaining} relay(s) remaining")
 
     elif rtype == "DONE":
         log("DONE", "INFO")
