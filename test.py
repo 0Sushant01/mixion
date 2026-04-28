@@ -68,6 +68,25 @@ def list_ports():
     return [p.device for p in serial.tools.list_ports.comports()]
 
 
+def jobs_match(a, b):
+    """Tolerant comparison of two job lists (order-insensitive)."""
+    if not isinstance(a, list) or not isinstance(b, list):
+        return False
+    if len(a) != len(b):
+        return False
+    def key(j):
+        try:
+            return (int(j.get("relay")), int(j.get("duration")))
+        except Exception:
+            return None
+    try:
+        sa = sorted([key(j) for j in a])
+        sb = sorted([key(j) for j in b])
+    except Exception:
+        return False
+    return sa == sb
+
+
 # ================= SERIAL WORKER =================
 
 def serial_reader_thread():
@@ -143,23 +162,31 @@ def handle_esp_response(resp):
     
     # ========== ACK ==========
     if msg_type == "ACK":
-        if state["pi_state"] != "CMD_SENT":
-            log(f"ACK in state {state['pi_state']}, ignoring", "ERR")
-            return
-        
+        ack_msg_id = resp.get("msg_id")
+
+        # Accept ACK if it matches current_cmd msg_id even if pi_state is different
+        if current_cmd and ack_msg_id == current_cmd.get("msg_id"):
+            if state["pi_state"] != "CMD_SENT":
+                log(f"ACK for msg {ack_msg_id} received while pi_state={state['pi_state']}", "INFO")
+        else:
+            # If not matching, require explicit CMD_SENT state
+            if state["pi_state"] != "CMD_SENT":
+                log(f"ACK in state {state['pi_state']}, ignoring", "ERR")
+                return
+
         if not current_cmd:
             log("ACK received but no CMD in progress", "ERR")
             return
-        
-        # Verify jobs match
-        if resp.get("jobs") != current_cmd["jobs"]:
+
+        # Tolerant jobs comparison (order-insensitive)
+        if not jobs_match(resp.get("jobs"), current_cmd.get("jobs")):
             log(f"ACK mismatch: got {resp.get('jobs')} vs {current_cmd['jobs']}", "ERR")
             return
-        
-        log("ACK valid, sending VERIFIED", "INFO")
+
+        log(f"ACK valid for msg {ack_msg_id}, sending VERIFIED", "INFO")
         state["pi_state"] = "VERIFIED_SENT"
         state["esp_state"] = "WAITING_VERIFIED"
-        
+
         # Send VERIFIED immediately
         verified = {
             "type": "VERIFIED",
