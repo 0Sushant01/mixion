@@ -1,15 +1,8 @@
-#!/usr/bin/env python3
-"""
-Relay Dispense Controller - Pi side
-Aligned with ESP32 firmware state machine and protocol.
-"""
-
 import json
 import threading
 import time
 import tkinter as tk
 from tkinter import messagebox, ttk
-import queue
 
 import serial
 import serial.tools.list_ports
@@ -19,7 +12,6 @@ import serial.tools.list_ports
 
 ser = None
 running = False
-read_queue = queue.Queue(maxsize=100)
 
 
 def list_ports():
@@ -34,15 +26,11 @@ current_cmd = None
 jobs = []
 active_jobs = []
 
-# State machine: matches ESP32 states
-state = {
-    "pi_state": "IDLE",  # IDLE, WAITING_ACK, WAITING_VERIFIED, RUNNING, DONE
-    "esp_state": "IDLE",  # IDLE, WAITING_VERIFIED, IN_PROGRESS, reset to IDLE
+run_state = {
+    "running": False,
     "run_started": None,
     "planned_total": 0,
-    "relays_done": set(),
-    "last_heartbeat": None,
-    "cmd_sent_time": None,
+    "relays_done": set(),  # Track which relays have finished (ESP runs all in parallel)
 }
 
 json_decoder = json.JSONDecoder()
@@ -78,38 +66,6 @@ def log(msg, tag="INFO"):
     log_box.see(tk.END)
 
 
-def set_connection_state(connected, port=""):
-    if connected:
-        conn_var.set(f"Connected: {port}")
-        conn_badge.config(text="CONNECTED", bg="#1f7a3a")
-    else:
-        conn_var.set("Disconnected")
-        conn_badge.config(text="DISCONNECTED", bg="#7a1f27")
-
-
-def set_run_state(pi_state_val, esp_state_val=None):
-    state["pi_state"] = pi_state_val
-    if esp_state_val is not None:
-        state["esp_state"] = esp_state_val
-    
-    display = f"{pi_state_val}"
-    if esp_state_val:
-        display += f" / ESP: {esp_state_val}"
-    
-    status_main_var.set(display)
-    
-    if pi_state_val == "RUNNING":
-        run_badge.config(text="RUNNING", bg="#1f7a3a")
-    elif pi_state_val == "DONE":
-        run_badge.config(text="DONE", bg="#2f5fa6")
-    elif pi_state_val in {"ERROR", "DISCARDED"}:
-        run_badge.config(text=pi_state_val, bg="#8c2f1b")
-    else:
-        run_badge.config(text=pi_state_val, bg="#58616a")
-
-
-# ================= SERIAL =================
-
 def refresh_ports():
     port_menu["values"] = list_ports()
     log("Ports refreshed", "INFO")
@@ -119,11 +75,12 @@ def connect():
     global ser, running
     try:
         ser = serial.Serial(port_var.get(), 115200, timeout=1)
-        time.sleep(2)  # ESP reset
-        
+        # Let ESP restart after opening serial.
+        time.sleep(2)
+
         running = True
-        threading.Thread(target=read_serial_worker, daemon=True).start()
-        
+        threading.Thread(target=read_serial, daemon=True).start()
+
         set_connection_state(True, port_var.get())
         log(f"Connected to {port_var.get()}", "INFO")
     except Exception as exc:
@@ -136,210 +93,15 @@ def disconnect():
     if ser and ser.is_open:
         ser.close()
     set_connection_state(False)
-    set_run_state("IDLE")
     log("Disconnected", "INFO")
 
-
-def send(data):
-    """Send JSON to ESP with strict \\n framing (ESP code expects only \\n)."""
-    if not ser or not ser.is_open:
-        messagebox.showerror("Error", "Not connected")
-        return
-
-    msg = json.dumps(data, separators=(",", ":"))
-    log("PI -> ESP : " + msg, "TX")
-    try:
-        ser.write((msg + "\n").encode("utf-8"))
-        ser.flush()
-    except Exception as exc:
-        log(f"SEND ERROR: {exc}", "ERR")
-
-
-def read_serial_worker():
-    """Dedicated serial reader thread — never blocks UI."""
-    global running
-    
-    buffer = ""
-    while running:
-        try:
-            if not ser or not ser.is_open:
-                time.sleep(0.1)
-                continue
-            
-            chunk = ser.read(ser.in_waiting or 1)
-            if not chunk:
-                time.sleep(0.01)
-                continue
-            
-            # Decode and normalize newlines
-            text = chunk.decode("utf-8", errors="ignore")
-            buffer += text.replace("\r\n", "\n").replace("\r", "\n")
-            
-            # Extract complete JSON objects
-            messages = []
-            while True:
-                # Skip non-JSON chars
-                idx = 0
-                while idx < len(buffer) and buffer[idx] not in "[{":
-                    idx += 1
-                
-                if idx >= len(buffer):
-                    buffer = ""
-                    break
-                
-                # Try to decode JSON from idx
-                try:
-                    obj, end_idx = json_decoder.raw_decode(buffer, idx)
-                    messages.append(obj)
-                    buffer = buffer[end_idx:]
-                except json.JSONDecodeError:
-                    # Incomplete JSON, keep and wait for more data
-                    buffer = buffer[idx:]
-                    break
-            
-            # Queue all complete messages
-            for msg in messages:
-                try:
-                    read_queue.put_nowait(msg)
-                except queue.Full:
-                    log("RX queue full, dropping message", "ERR")
-        
-        except Exception as exc:
-            log(f"SERIAL READ ERROR: {exc}", "ERR")
-            time.sleep(0.1)
-
-
-def process_rx_queue():
-    """Process queued messages from serial reader thread."""
-    try:
-        while not read_queue.empty():
-            msg = read_queue.get_nowait()
-            log("ESP -> PI : " + json.dumps(msg, separators=(",", ":")), "RX")
-            handle_response(msg)
-    except queue.Empty:
-        pass
-
-
-def handle_response(resp):
-    """Handle all ESP32 response types."""
-    global current_cmd, active_jobs
-    
-    rtype = resp.get("type")
-    
-    if rtype == "ACK":
-        log("ACK received", "INFO")
-        if state["pi_state"] == "WAITING_ACK":
-            set_run_state("WAITING_VERIFIED", "WAITING_VERIFIED")
-            # Send VERIFIED immediately
-            verified = {
-                "type": "VERIFIED",
-                "msg_id": current_cmd["msg_id"],
-                "jobs": current_cmd["jobs"],
-            }
-            send(verified)
-    
-    elif rtype == "STARTED":
-        log("STARTED - all relays activated in parallel", "INFO")
-        state["run_started"] = time.monotonic()
-        state["relays_done"] = set()
-        set_run_state("RUNNING", "IN_PROGRESS")
-        status_relay_var.set(f"Executing {len(active_jobs)} relay(s) in parallel")
-        update_runtime_ui()
-    
-    elif rtype == "STEP_DONE":
-        relay_num = resp.get("relay")
-        log(f"STEP_DONE relay={relay_num}", "INFO")
-        
-        if state["pi_state"] == "RUNNING":
-            state["relays_done"].add(relay_num)
-            remaining = len(active_jobs) - len(state["relays_done"])
-            
-            # Find job duration for this relay
-            job_dur = None
-            for j in active_jobs:
-                if j["relay"] == relay_num:
-                    job_dur = j["duration"]
-                    break
-            
-            if job_dur:
-                elapsed = int(time.monotonic() - state["run_started"])
-                delta = elapsed - job_dur
-                status = "OK" if abs(delta) <= 1 else f"drift{delta:+d}s"
-                status_relay_var.set(f"Relay {relay_num} done ({status}), {remaining} remaining")
-            else:
-                status_relay_var.set(f"Relay {relay_num} done, {remaining} remaining")
-    
-    elif rtype == "DONE":
-        log("DONE - all relays completed", "INFO")
-        set_run_state("DONE", "IDLE")
-        status_relay_var.set("Execution complete")
-        active_jobs = []
-    
-    elif rtype == "DISCARDED":
-        log("DISCARDED - verified timeout", "ERR")
-        set_run_state("DISCARDED", "IDLE")
-        active_jobs = []
-    
-    elif rtype == "ERROR":
-        reason = resp.get("reason", "unknown")
-        log(f"ERROR from ESP: {reason}", "ERR")
-        set_run_state("ERROR", "IDLE")
-        active_jobs = []
-    
-    elif rtype == "BUSY":
-        log("ESP busy, try again", "ERR")
-        messagebox.showwarning("ESP Busy", "Device is busy. Try again.")
-    
-    elif rtype == "LIVE":
-        state["last_heartbeat"] = time.monotonic()
-        log("HEARTBEAT (LIVE) received", "INFO")
-    
-    elif rtype == "WAITING_VERIFIED":
-        log(f"ESP waiting for VERIFIED (state check)", "INFO")
-        set_run_state("WAITING_VERIFIED", "WAITING_VERIFIED")
-    
-    elif rtype == "IN_PROGRESS":
-        log(f"ESP in progress (state check)", "INFO")
-        set_run_state("RUNNING", "IN_PROGRESS")
-    
-    elif rtype == "IDLE":
-        log(f"ESP idle (state check)", "INFO")
-        set_run_state("IDLE", "IDLE")
-
-
-def update_runtime_ui():
-    """Update elapsed time during execution."""
-    if state["pi_state"] != "RUNNING" or not state["run_started"]:
-        return
-    
-    elapsed = int(time.monotonic() - state["run_started"])
-    planned = state["planned_total"]
-    status_total_var.set(f"Run elapsed: {elapsed}s / planned {planned}s")
-    
-    root.after(500, update_runtime_ui)
-
-
-def monitor_heartbeat():
-    """Check heartbeat and send STATUS if not received recently."""
-    now = time.monotonic()
-    
-    if state["last_heartbeat"] is not None:
-        since_hb = now - state["last_heartbeat"]
-        if since_hb > 15:  # No heartbeat in 15 seconds, send STATUS
-            log("Heartbeat timeout, sending STATUS probe", "INFO")
-            send({"type": "STATUS", "msg_id": "probe"})
-            state["last_heartbeat"] = now
-    
-    root.after(5000, monitor_heartbeat)
-
-
-# ================= JOB BUILDER =================
 
 def parse_float(value, field_name):
     try:
         parsed = float(value)
     except ValueError as exc:
         raise ValueError(f"{field_name} must be a number") from exc
+
     if parsed <= 0:
         raise ValueError(f"{field_name} must be > 0")
     return parsed
@@ -350,6 +112,7 @@ def parse_int(value, field_name):
         parsed = int(value)
     except ValueError as exc:
         raise ValueError(f"{field_name} must be an integer") from exc
+
     if parsed <= 0:
         raise ValueError(f"{field_name} must be > 0")
     return parsed
@@ -443,6 +206,22 @@ def clear_jobs():
     log("Jobs cleared", "INFO")
 
 
+def build_payload_jobs():
+    return [{"relay": j["relay"], "duration": j["duration"]} for j in jobs]
+
+
+def send(data):
+    if not ser or not ser.is_open:
+        messagebox.showerror("Error", "Not connected")
+        return
+
+    msg = json.dumps(data)
+    log("PI -> ESP : " + msg, "TX")
+    # ESP code only strips \n, not \r\n; send just \n to avoid JSON parse errors.
+    ser.write((msg + "\n").encode("utf-8"))
+    ser.flush()
+
+
 def send_cmd():
     global msg_id, current_cmd, active_jobs
 
@@ -454,20 +233,16 @@ def send_cmd():
         messagebox.showerror("Error", "No jobs added")
         return
 
-    payload_jobs = [{"relay": j["relay"], "duration": j["duration"]} for j in jobs]
+    payload_jobs = build_payload_jobs()
     cmd = {"type": "CMD", "msg_id": str(msg_id), "jobs": payload_jobs}
     current_cmd = cmd
     active_jobs = [j.copy() for j in jobs]
 
-    state["planned_total"] = sum(j["duration"] for j in jobs)
-    state["cmd_sent_time"] = time.monotonic()
-    
-    set_run_state("WAITING_ACK", "WAITING_VERIFIED")
+    run_state["planned_total"] = sum(j["duration"] for j in jobs)
     send(cmd)
-    
     jobs.clear()
     refresh_jobs_view()
-    log("CMD sent, waiting for ACK...", "INFO")
+    log("Queued jobs sent and cleared", "INFO")
     msg_id += 1
 
 
@@ -475,10 +250,176 @@ def test_status():
     send({"type": "STATUS", "msg_id": "test"})
 
 
-def process_ui_messages():
-    """Poll for serial messages and update UI."""
-    process_rx_queue()
-    root.after(100, process_ui_messages)
+def update_runtime_ui():
+    if not run_state["running"]:
+        return
+
+    now = time.monotonic()
+    run_elapsed = int(now - run_state["run_started"]) if run_state["run_started"] else 0
+    step_elapsed = int(now - run_state["step_started"]) if run_state["step_started"] else 0
+
+    total_planned = run_state["planned_total"]
+    status_total_var.set(f"Run elapsed: {run_elapsed}s / planned {total_planned}s")
+    status_step_var.set(f"Current step elapsed: {step_elapsed}s")
+
+    root.after(500, update_runtime_ui)
+
+
+def start_run_tracking():
+    run_state["running"] = True
+    run_state["run_started"] = time.monotonic()
+    run_state["relays_done"] = set()
+    set_run_state("RUNNING")
+    status_relay_var.set("All relays active (parallel execution)")
+    update_runtime_ui()
+
+
+def stop_run_tracking(final_state):
+    global active_jobs
+
+    run_state["running"] = False
+    run_state["relays_done"] = set()
+    active_jobs = []
+    set_run_state(final_state)
+
+
+def check_relay_duration(relay_num, actual_seconds):
+    """Check duration for a specific relay that just finished.
+    Since ESP runs all relays in parallel, we need to find the job with this relay.
+    """
+    job = None
+    for j in active_jobs:
+        if j["relay"] == relay_num:
+            job = j
+            break
+
+    if job is None:
+        log(f"STEP_DONE relay={relay_num} but not in active jobs", "ERR")
+        return
+
+    expected = job["duration"]
+    delta = actual_seconds - expected
+
+    if abs(delta) <= 1:
+        log(
+            f"Relay {relay_num} duration OK: expected {expected}s, actual {actual_seconds}s",
+            "INFO",
+        )
+    else:
+        log(
+            (
+                f"Relay {relay_num} duration drift: expected {expected}s, "
+                f"actual {actual_seconds}s, delta {delta:+d}s"
+            ),
+            "ERR",
+        )
+
+
+def handle_response(resp):
+    global current_cmd
+
+    rtype = resp.get("type")
+
+    if rtype == "ACK":
+        log("ACK received", "INFO")
+
+        if current_cmd and resp.get("jobs") == current_cmd["jobs"]:
+            log("ACK valid -> sending VERIFIED", "INFO")
+            verified = {
+                "type": "VERIFIED",
+                "msg_id": current_cmd["msg_id"],
+                "jobs": current_cmd["jobs"],
+            }
+            send(verified)
+        else:
+            log("ACK invalid", "ERR")
+
+    elif rtype == "STARTED":
+        log("STARTED", "INFO")
+        start_run_tracking()
+
+    elif rtype == "STEP_DONE":
+        relay_done = resp.get("relay")
+        log(f"STEP_DONE relay={relay_done}", "INFO")
+
+        if not run_state["running"]:
+            log(f"STEP_DONE received but not running", "ERR")
+            return
+
+        # Calculate actual duration for this specific relay (parallel execution).
+        now = time.monotonic()
+        if run_state["run_started"] is not None:
+            actual_relay_seconds = int(now - run_state["run_started"])
+            check_relay_duration(relay_done, actual_relay_seconds)
+
+        run_state["relays_done"].add(relay_done)
+        remaining = len(active_jobs) - len(run_state["relays_done"])
+        status_relay_var.set(f"Relay {relay_done} done, {remaining} relay(s) remaining")
+
+    elif rtype == "DONE":
+        log("DONE", "INFO")
+        stop_run_tracking("DONE")
+
+    elif rtype == "DISCARDED":
+        log("DISCARDED", "ERR")
+        stop_run_tracking("DISCARDED")
+
+    elif rtype == "ERROR":
+        log(f"ERROR: {resp.get('reason')}", "ERR")
+        stop_run_tracking("ERROR")
+
+    elif rtype == "LIVE":
+        log("HEARTBEAT", "INFO")
+
+
+def read_serial():
+    global running
+
+    buffer = ""
+    while running:
+        try:
+            data = ser.read(ser.in_waiting or 1).decode("utf-8", errors="ignore")
+            if not data:
+                continue
+
+            # Normalize carriage returns because many serial devices emit \r or \r\n.
+            buffer += data.replace("\r", "\n")
+
+            messages, buffer = extract_json_messages(buffer)
+            for parsed in messages:
+                log("ESP -> PI : " + json.dumps(parsed, separators=(",", ":")), "RX")
+                handle_response(parsed)
+
+            # Keep buffer bounded if serial stream contains garbage/noise.
+            if len(buffer) > 2048:
+                buffer = buffer[-1024:]
+        except Exception as exc:
+            log(f"READ ERROR: {exc}", "ERR")
+            break
+
+
+def extract_json_messages(stream_buffer):
+    messages = []
+    idx = 0
+    size = len(stream_buffer)
+
+    while idx < size:
+        while idx < size and stream_buffer[idx] not in "[{":
+            idx += 1
+
+        if idx >= size:
+            return messages, ""
+
+        try:
+            obj, end = json_decoder.raw_decode(stream_buffer, idx)
+        except json.JSONDecodeError:
+            # Incomplete JSON: keep from first possible JSON char for next serial chunk.
+            return messages, stream_buffer[idx:]
+
+        messages.append(obj)
+        idx = end
+
+    return messages, ""
 
 
 # ================= LAYOUT =================
@@ -500,7 +441,7 @@ tk.Label(
 ).pack(anchor="w")
 tk.Label(
     title_wrap,
-    text="Plan by ml, auto-calculate duration, parallel execution.",
+    text="Plan by ml, auto-calculate duration, monitor runtime drift.",
     bg="#113a5c",
     fg="#b7d1e8",
     font=("TkDefaultFont", 10),
@@ -602,6 +543,29 @@ status_frame.pack(fill="x", pady=(0, 10))
 status_main_var = tk.StringVar(value="IDLE")
 status_relay_var = tk.StringVar(value="-")
 status_total_var = tk.StringVar(value="Run elapsed: 0s / planned 0s")
+status_step_var = tk.StringVar(value="Current step elapsed: 0s")
+
+
+def set_connection_state(connected, port=""):
+    if connected:
+        conn_var.set(f"Connected: {port}")
+        conn_badge.config(text="CONNECTED", bg="#1f7a3a")
+    else:
+        conn_var.set("Disconnected")
+        conn_badge.config(text="DISCONNECTED", bg="#7a1f27")
+
+
+def set_run_state(state):
+    status_main_var.set(state)
+    if state == "RUNNING":
+        run_badge.config(text="RUNNING", bg="#1f7a3a")
+    elif state == "DONE":
+        run_badge.config(text="DONE", bg="#2f5fa6")
+    elif state in {"ERROR", "DISCARDED"}:
+        run_badge.config(text=state, bg="#8c2f1b")
+    else:
+        run_badge.config(text=state, bg="#58616a")
+
 
 run_badge = tk.Label(
     status_frame,
@@ -621,6 +585,7 @@ ttk.Label(status_frame, text="Relay:").grid(row=1, column=0, sticky="w", padx=(0
 ttk.Label(status_frame, textvariable=status_relay_var).grid(row=1, column=1, sticky="w")
 
 ttk.Label(status_frame, textvariable=status_total_var).grid(row=2, column=0, columnspan=3, sticky="w", pady=(6, 0))
+ttk.Label(status_frame, textvariable=status_step_var).grid(row=3, column=0, columnspan=3, sticky="w")
 
 log_frame = ttk.LabelFrame(right, text="Serial Log", padding=8, style="Panel.TLabelframe")
 log_frame.pack(fill="both", expand=True)
@@ -638,8 +603,5 @@ log_box.tag_config("INFO", foreground="#202124")
 set_connection_state(False)
 set_run_state("IDLE")
 
-# Start background threads
-process_ui_messages()
-monitor_heartbeat()
 
 root.mainloop()
