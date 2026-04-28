@@ -38,11 +38,24 @@ run_state = {
 
 root = tk.Tk()
 root.title("Relay Dispense Controller")
-root.geometry("980x760")
+root.geometry("1160x820")
+root.minsize(1020, 720)
+root.configure(bg="#eef3f7")
 
 style = ttk.Style(root)
 style.theme_use("clam")
-style.configure("Title.TLabel", font=("TkDefaultFont", 13, "bold"))
+
+style.configure("App.TFrame", background="#eef3f7")
+style.configure("Panel.TLabelframe", background="#f8fbff", borderwidth=1, relief="solid")
+style.configure("Panel.TLabelframe.Label", background="#f8fbff", foreground="#16324f", font=("TkDefaultFont", 11, "bold"))
+style.configure("Title.TLabel", background="#eef3f7", foreground="#153554", font=("TkDefaultFont", 13, "bold"))
+style.configure("Subtle.TLabel", background="#eef3f7", foreground="#4e6072")
+style.configure("Primary.TButton", font=("TkDefaultFont", 10, "bold"))
+style.configure("Accent.TButton", font=("TkDefaultFont", 10, "bold"))
+style.map("Primary.TButton", background=[("!disabled", "#1f6feb")], foreground=[("!disabled", "white")])
+style.map("Accent.TButton", background=[("!disabled", "#2b8a3e")], foreground=[("!disabled", "white")])
+style.configure("Treeview", rowheight=28, font=("TkDefaultFont", 10))
+style.configure("Treeview.Heading", font=("TkDefaultFont", 10, "bold"))
 
 
 def log(msg, tag="INFO"):
@@ -66,7 +79,7 @@ def connect():
         running = True
         threading.Thread(target=read_serial, daemon=True).start()
 
-        conn_var.set(f"Connected: {port_var.get()}")
+        set_connection_state(True, port_var.get())
         log(f"Connected to {port_var.get()}", "INFO")
     except Exception as exc:
         messagebox.showerror("Error", str(exc))
@@ -77,7 +90,7 @@ def disconnect():
     running = False
     if ser and ser.is_open:
         ser.close()
-    conn_var.set("Disconnected")
+    set_connection_state(False)
     log("Disconnected", "INFO")
 
 
@@ -250,7 +263,7 @@ def start_run_tracking():
     run_state["job_index"] = 0
     run_state["run_started"] = time.monotonic()
     run_state["step_started"] = time.monotonic()
-    status_main_var.set("RUNNING")
+    set_run_state("RUNNING")
 
     if jobs:
         current = jobs[0]
@@ -265,7 +278,7 @@ def stop_run_tracking(final_state):
     run_state["running"] = False
     run_state["job_index"] = -1
     run_state["step_started"] = None
-    status_main_var.set(final_state)
+    set_run_state(final_state)
 
 
 def check_step_duration(step_idx, actual_seconds, relay_from_resp=None):
@@ -390,29 +403,59 @@ def read_serial():
 
 # ================= LAYOUT =================
 
-top = ttk.Frame(root, padding=10)
-top.pack(fill="x")
+main = ttk.Frame(root, padding=10, style="App.TFrame")
+main.pack(fill="both", expand=True)
 
-ttk.Label(top, text="Serial Connection", style="Title.TLabel").grid(
-    row=0, column=0, columnspan=6, sticky="w", pady=(0, 8)
+header = tk.Frame(main, bg="#113a5c", bd=0, relief="flat")
+header.pack(fill="x", pady=(0, 10))
+
+title_wrap = tk.Frame(header, bg="#113a5c")
+title_wrap.pack(side="left", padx=14, pady=10)
+tk.Label(
+    title_wrap,
+    text="Relay Dispense Controller",
+    bg="#113a5c",
+    fg="#f4f8fc",
+    font=("TkDefaultFont", 14, "bold"),
+).pack(anchor="w")
+tk.Label(
+    title_wrap,
+    text="Plan by ml, auto-calculate duration, monitor runtime drift.",
+    bg="#113a5c",
+    fg="#b7d1e8",
+    font=("TkDefaultFont", 10),
+).pack(anchor="w")
+
+conn_badge = tk.Label(
+    header,
+    text="DISCONNECTED",
+    bg="#7a1f27",
+    fg="white",
+    padx=12,
+    pady=6,
+    font=("TkDefaultFont", 10, "bold"),
 )
+conn_badge.pack(side="right", padx=14, pady=12)
+
+controls = ttk.LabelFrame(main, text="Connection & Commands", padding=10, style="Panel.TLabelframe")
+controls.pack(fill="x", pady=(0, 10))
 
 port_var = tk.StringVar(value="/dev/ttyUSB0")
 conn_var = tk.StringVar(value="Disconnected")
 
-port_menu = ttk.Combobox(top, textvariable=port_var, values=list_ports(), width=24)
-port_menu.grid(row=1, column=0, padx=(0, 8))
+port_menu = ttk.Combobox(controls, textvariable=port_var, values=list_ports(), width=24)
+port_menu.grid(row=0, column=0, padx=(0, 8), pady=(0, 8), sticky="w")
 
-ttk.Button(top, text="Refresh", command=refresh_ports).grid(row=1, column=1, padx=4)
-ttk.Button(top, text="Connect", command=connect).grid(row=1, column=2, padx=4)
-ttk.Button(top, text="Disconnect", command=disconnect).grid(row=1, column=3, padx=4)
-ttk.Button(top, text="Send CMD", command=send_cmd).grid(row=1, column=4, padx=4)
-ttk.Button(top, text="Test STATUS", command=test_status).grid(row=1, column=5, padx=4)
+ttk.Button(controls, text="Refresh", command=refresh_ports).grid(row=0, column=1, padx=4, pady=(0, 8))
+ttk.Button(controls, text="Connect", style="Primary.TButton", command=connect).grid(row=0, column=2, padx=4, pady=(0, 8))
+ttk.Button(controls, text="Disconnect", command=disconnect).grid(row=0, column=3, padx=4, pady=(0, 8))
+ttk.Button(controls, text="Send CMD", style="Accent.TButton", command=send_cmd).grid(row=0, column=4, padx=4, pady=(0, 8))
+ttk.Button(controls, text="Test STATUS", command=test_status).grid(row=0, column=5, padx=4, pady=(0, 8))
 
-ttk.Label(top, textvariable=conn_var).grid(row=2, column=0, columnspan=6, sticky="w", pady=(8, 0))
+ttk.Label(controls, textvariable=conn_var, style="Subtle.TLabel").grid(row=1, column=0, columnspan=6, sticky="w")
 
-builder = ttk.LabelFrame(root, text="Dispense Job Builder", padding=10)
-builder.pack(fill="x", padx=10, pady=(0, 10))
+builder = ttk.LabelFrame(main, text="Dispense Job Builder", padding=10, style="Panel.TLabelframe")
+builder.pack(fill="x", pady=(0, 10))
 
 relay_var = tk.StringVar(value="1")
 target_ml_var = tk.StringVar(value="10")
@@ -431,7 +474,7 @@ ttk.Entry(builder, textvariable=capacity_var, width=14).grid(row=1, column=2, pa
 ttk.Label(builder, text="Calculated Duration").grid(row=0, column=3, sticky="w")
 ttk.Label(builder, textvariable=duration_preview_var).grid(row=1, column=3, padx=(0, 10), sticky="w")
 
-ttk.Button(builder, text="Add Job", command=add_job).grid(row=1, column=4, padx=(0, 6))
+ttk.Button(builder, text="Add Job", style="Primary.TButton", command=add_job).grid(row=1, column=4, padx=(0, 6))
 ttk.Button(builder, text="Remove Selected", command=remove_selected_job).grid(row=1, column=5, padx=(0, 6))
 ttk.Button(builder, text="Clear", command=clear_jobs).grid(row=1, column=6)
 
@@ -439,10 +482,15 @@ target_ml_var.trace_add("write", update_preview)
 capacity_var.trace_add("write", update_preview)
 update_preview()
 
-middle = ttk.Frame(root, padding=(10, 0, 10, 0))
-middle.pack(fill="both", expand=True)
+content = ttk.Panedwindow(main, orient="horizontal")
+content.pack(fill="both", expand=True)
 
-jobs_frame = ttk.LabelFrame(middle, text="Queued Jobs", padding=8)
+left = ttk.Frame(content, style="App.TFrame")
+right = ttk.Frame(content, style="App.TFrame")
+content.add(left, weight=3)
+content.add(right, weight=2)
+
+jobs_frame = ttk.LabelFrame(left, text="Queued Jobs", padding=8, style="Panel.TLabelframe")
 jobs_frame.pack(fill="both", expand=True)
 
 cols = ("idx", "relay", "target_ml", "capacity", "duration")
@@ -460,18 +508,54 @@ jobs_tree.column("target_ml", width=120, anchor="center")
 jobs_tree.column("capacity", width=130, anchor="center")
 jobs_tree.column("duration", width=100, anchor="center")
 
-jobs_tree.pack(fill="both", expand=True)
+jobs_scroll = ttk.Scrollbar(jobs_frame, orient="vertical", command=jobs_tree.yview)
+jobs_tree.configure(yscrollcommand=jobs_scroll.set)
+jobs_tree.pack(side="left", fill="both", expand=True)
+jobs_scroll.pack(side="right", fill="y")
 
 summary_var = tk.StringVar(value="Jobs: 0 | Total dispense: 0.00 ml | Planned duration: 0 s")
-ttk.Label(root, textvariable=summary_var, padding=(10, 4)).pack(fill="x")
+ttk.Label(left, textvariable=summary_var, style="Subtle.TLabel", padding=(8, 6)).pack(fill="x")
 
-status_frame = ttk.LabelFrame(root, text="Run Status", padding=10)
-status_frame.pack(fill="x", padx=10, pady=(0, 10))
+status_frame = ttk.LabelFrame(right, text="Run Status", padding=10, style="Panel.TLabelframe")
+status_frame.pack(fill="x", pady=(0, 10))
 
 status_main_var = tk.StringVar(value="IDLE")
 status_relay_var = tk.StringVar(value="-")
 status_total_var = tk.StringVar(value="Run elapsed: 0s / planned 0s")
 status_step_var = tk.StringVar(value="Current step elapsed: 0s")
+
+
+def set_connection_state(connected, port=""):
+    if connected:
+        conn_var.set(f"Connected: {port}")
+        conn_badge.config(text="CONNECTED", bg="#1f7a3a")
+    else:
+        conn_var.set("Disconnected")
+        conn_badge.config(text="DISCONNECTED", bg="#7a1f27")
+
+
+def set_run_state(state):
+    status_main_var.set(state)
+    if state == "RUNNING":
+        run_badge.config(text="RUNNING", bg="#1f7a3a")
+    elif state == "DONE":
+        run_badge.config(text="DONE", bg="#2f5fa6")
+    elif state in {"ERROR", "DISCARDED"}:
+        run_badge.config(text=state, bg="#8c2f1b")
+    else:
+        run_badge.config(text=state, bg="#58616a")
+
+
+run_badge = tk.Label(
+    status_frame,
+    text="IDLE",
+    bg="#58616a",
+    fg="white",
+    padx=10,
+    pady=4,
+    font=("TkDefaultFont", 10, "bold"),
+)
+run_badge.grid(row=0, column=2, sticky="e", padx=(12, 0))
 
 ttk.Label(status_frame, text="State:").grid(row=0, column=0, sticky="w", padx=(0, 6))
 ttk.Label(status_frame, textvariable=status_main_var).grid(row=0, column=1, sticky="w")
@@ -482,15 +566,21 @@ ttk.Label(status_frame, textvariable=status_relay_var).grid(row=1, column=1, sti
 ttk.Label(status_frame, textvariable=status_total_var).grid(row=2, column=0, columnspan=3, sticky="w", pady=(6, 0))
 ttk.Label(status_frame, textvariable=status_step_var).grid(row=3, column=0, columnspan=3, sticky="w")
 
-log_frame = ttk.LabelFrame(root, text="Serial Log", padding=8)
-log_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+log_frame = ttk.LabelFrame(right, text="Serial Log", padding=8, style="Panel.TLabelframe")
+log_frame.pack(fill="both", expand=True)
 
 log_box = tk.Text(log_frame, height=13)
-log_box.pack(fill="both", expand=True)
+log_scroll = ttk.Scrollbar(log_frame, orient="vertical", command=log_box.yview)
+log_box.configure(yscrollcommand=log_scroll.set)
+log_box.pack(side="left", fill="both", expand=True)
+log_scroll.pack(side="right", fill="y")
 log_box.tag_config("TX", foreground="#174ea6")
 log_box.tag_config("RX", foreground="#137333")
 log_box.tag_config("ERR", foreground="#b3261e")
 log_box.tag_config("INFO", foreground="#202124")
+
+set_connection_state(False)
+set_run_state("IDLE")
 
 
 root.mainloop()
