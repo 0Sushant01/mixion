@@ -134,6 +134,13 @@ MIGRATIONS = [
             "ALTER TABLE lines ADD COLUMN calibration_value REAL DEFAULT 0.0"
         ],
     ),
+    (
+        5,
+        "Add msg_id column to transactions table for serial command tracking",
+        [
+            "ALTER TABLE transactions ADD COLUMN msg_id TEXT",
+        ],
+    ),
 ]
 
 
@@ -209,7 +216,7 @@ REQUIRED_SCHEMA = {
     "recipes":          ["id", "drink_id", "ingredient_id", "amount_ml"],
     "extras":           ["id", "name", "price"],
     "recipe_extras":    ["drink_id", "extra_id"],
-    "transactions":     ["id", "drink_id", "status", "timestamp"],
+    "transactions":     ["id", "drink_id", "status", "timestamp", "msg_id"],
 }
 
 
